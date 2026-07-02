@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Api-test
+Exec=api-test
+Icon=eltonarodrigues.org.codeberg.restest
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=GTK;
+StartupNotify=true
+DBusActivatable=true

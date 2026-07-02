@@ -1,0 +1,8 @@
+# List of source files containing translatable strings.
+# Please keep this file sorted alphabetically.
+data/eltonarodrigues.org.codeberg.restest.desktop.in
+data/eltonarodrigues.org.codeberg.restest.metainfo.xml.in
+data/eltonarodrigues.org.codeberg.restest.gschema.xml
+src/main.py
+src/window.py
+src/window.ui
