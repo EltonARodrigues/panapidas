@@ -1,0 +1,243 @@
+using Gtk 4.0;
+using Adw 1;
+using Handy 1;
+
+template $ApiTestWindow: Adw.ApplicationWindow {
+  title: _("Gazette");
+  default-width: 800;
+  default-height: 600;
+
+  content: Adw.NavigationSplitView split_view {
+    sidebar: Adw.NavigationPage {
+      title: _("Collections");
+
+      child: Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {}
+
+        content: ScrolledWindow {
+          child: ListBox feed_list {
+            selection-mode: single;
+
+            styles [
+              "navigation-sidebar",
+            ]
+
+            ListBoxRow {
+              child: Label {
+                label: _("Request");
+                halign: start;
+                margin-start: 12;
+                margin-end: 12;
+                margin-top: 6;
+                margin-bottom: 6;
+              };
+            }
+          };
+        };
+      };
+    };
+
+    content: Adw.NavigationPage {
+      title: _("Request");
+
+      child: Adw.ToolbarView {
+        [top]
+        Adw.HeaderBar {
+          [end]
+          MenuButton {
+            primary: true;
+            icon-name: "open-menu-symbolic";
+            tooltip-text: _("Main Menu");
+            menu-model: primary_menu;
+          }
+        }
+
+        content: Box {
+          orientation: vertical;
+          margin-start: 5;
+          margin-end: 5;
+          margin-top: 5;
+          halign: center;
+
+          Box {
+            orientation: horizontal;
+            spacing: 5;
+
+            Box {
+              orientation: horizontal;
+
+              styles [
+                "linked",
+              ]
+
+              DropDown http_method_list {
+                width-request: 100;
+
+                model: SingleSelection {
+                  model: StringList {
+                    strings: [
+                      "GET",
+                      "POST",
+                      "PATCH",
+                      "DELETE",
+                      "PUT",
+                    ];
+                  };
+
+                  selected: 0;
+                };
+              }
+
+              Entry url_entry {
+                width-request: 450;
+                placeholder-text: _("Enter URL");
+
+                changed => $on_changed();
+
+              }
+            }
+
+            Button {
+              label: _("SEND");
+            }
+          }
+
+          Box {
+            margin-top: 5;
+            orientation: vertical;
+            spacing: 5;
+
+            Gtk.StackSwitcher {
+              stack: stack;
+              halign: center;
+            }
+
+            Gtk.Stack stack {
+              transition-type: crossfade;
+              vexpand: false;
+
+              Gtk.StackPage {
+                name: "headers";
+                title: _("Headers");
+
+                child: Box {
+                  orientation: vertical;
+                  spacing: 5;
+                  hexpand: true;
+                  vexpand: true;
+
+                  // Button dasd2222 {
+                  //   icon-name: "list-add-symbolic";
+                  //   valign: center;
+                  //   hexpand: false;
+                  // }
+
+                  ScrolledWindow {
+                    max-content-height: 200;
+                    hscrollbar-policy: never;
+                    propagate-natural-height: true;
+                    has-frame: false;
+                    valign: start;
+
+                    ListBox {
+                      selection-mode: single;
+
+                      Gtk.ListBoxRow {
+                        Gtk.Box header_list {
+                          orientation: horizontal;
+                          halign: fill;
+                          margin-top: 8;
+                          margin-start: 8;
+                          margin-end: 8;
+                          margin-bottom: 8;
+                          spacing: 5;
+
+                          Gtk.Box {
+                            styles [
+                              "linked",
+                            ]
+
+                            $HeaderEntry header_key {
+                              hexpand: true;
+                              placeholder-text: _("Key");
+
+                              header-id: 1;
+
+                              changed => $on_changed();
+                            }
+
+                            $HeaderEntry header_value {
+                              hexpand: true;
+                              placeholder-text: _("Value");
+
+                              header-id: 1;
+
+                              changed => $on_changed();
+                            }
+                          }
+
+                          Gtk.Button {
+                            icon-name: "edit-delete-symbolic";
+                            tooltip-text: "Remover item";
+                            halign: center;
+                            valign: center;
+                            width-request: 32;
+                            height-request: 32;
+                          }
+                        }
+                      }
+
+                      styles [
+                        "boxed-list",
+                      ]
+                    }
+                  }
+                };
+              }
+
+              Gtk.StackPage {
+                name: "body";
+                title: _("Body");
+
+                child: Box {
+                              Gtk.TextView {
+              monospace: true;
+              hexpand: true;
+              vexpand: true;
+            }
+                };
+              }
+            }
+
+            Gtk.TextView {
+              editable: false;
+              monospace: true;
+              hexpand: true;
+              vexpand: true;
+            }
+          }
+        };
+      };
+    };
+  };
+}
+
+menu primary_menu {
+  section {
+    item {
+      label: _("_Preferences");
+      action: "app.preferences";
+    }
+
+    item {
+      label: _("_Keyboard Shortcuts");
+      action: "app.shortcuts";
+    }
+
+    item {
+      label: _("_About Gazette");
+      action: "app.about";
+    }
+  }
+}

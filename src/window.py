@@ -19,12 +19,48 @@
 
 from gi.repository import Adw
 from gi.repository import Gtk
+from .header_entry import HeaderEntry
 
 @Gtk.Template(resource_path='/eltonarodrigues/org/codeberg/restest/window.ui')
 class ApiTestWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'ApiTestWindow'
 
-    label = Gtk.Template.Child()
+    header_list = Gtk.Template.Child()
+
+    headers = {}
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @Gtk.Template.Callback()
+    def on_changed(self, widget):
+
+        widget_name = widget.get_buildable_id()
+
+
+        if widget_name == 'url_entry':
+            text = widget.get_text()
+            print(f"Live text: {text}")
+            return
+
+    @Gtk.Template.Callback()
+    def on_changed(self, widget):
+
+        widget_name = widget.get_buildable_id()
+
+
+        if widget_name == 'url_entry':
+            text = widget.get_text()
+            print(f"Live text: {text}")
+            return
+
+        if widget._is_header:
+            header_id = widget.header_id
+
+            if not hasattr(headers, header_id):
+                headerRow = HeaderEntry()
+                headerRow.header_id(header_id + 1)
+
+
+            print(f'{header_id}')
+

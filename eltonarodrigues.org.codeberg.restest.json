@@ -1,7 +1,7 @@
 {
     "id" : "eltonarodrigues.org.codeberg.restest",
-    "runtime" : "org.gnome.Platform",
-    "runtime-version" : "48",
+    "runtime" : "org.gnome.Sdk",
+    "runtime-version" : "50",
     "sdk" : "org.gnome.Sdk",
     "command" : "api-test",
     "finish-args" : [
