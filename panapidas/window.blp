@@ -117,7 +117,7 @@ template $ApiTestWindow: Adw.ApplicationWindow {
 
               Gtk.StackPage {
                 name: "params";
-                title: _("params");
+                title: _("Params");
 
                 child: Box {
                   orientation: vertical;
@@ -175,17 +175,47 @@ template $ApiTestWindow: Adw.ApplicationWindow {
                 name: "body";
                 title: _("Body");
 
-                child: Box {
-                  Gtk.TextView request_body{
-                    monospace: true;
-                    hexpand: true;
-                    vexpand: true;
+                child: Box body_type_widget{
+                  orientation: vertical;
+                  height-request: 250;
+
+                  Adw.ToggleGroup {
+                    active-name: "None";
+
+                    styles  ["flat"]
+
+
+                    notify::active-name => $on_body_type_change();
+
+                    Adw.Toggle {
+                      name: "none";
+                      label: _("None");
+
+                    }
+                    Adw.Toggle {
+                      name: "form_data";
+                      label: _("form-data");
+                    }
+                    Adw.Toggle {
+                      name: "form_urlencoded";
+                      label: _("x-www-form-urlencoded");
+                    }
+                    Adw.Toggle {
+                      name: "raw";
+                      label: _("raw");
+                    }
                   }
+
+                  // Gtk.TextView request_body {
+                  //   monospace: true;
+                  //   hexpand: true;
+                  //   vexpand: true;
+                  // }
                 };
               }
             }
 
-            Gtk.TextView {
+            Gtk.TextView response_body {
               editable: false;
               monospace: true;
               hexpand: true;
