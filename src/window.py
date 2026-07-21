@@ -18,19 +18,91 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from gi.repository import Adw
-from gi.repository import Gtk
-from .header_entry import HeaderEntry
+from gi.repository import Gtk, GObject, Gio
+from src.model.header import Header
+
 
 @Gtk.Template(resource_path='/eltonarodrigues/org/codeberg/restest/window.ui')
 class ApiTestWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'ApiTestWindow'
 
     header_list = Gtk.Template.Child()
+    request_header_list = Gtk.Template.Child()
 
-    headers = {}
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.header_model = Gio.ListStore(item_type=Header)
+        self.header_model.append(Header(id=1, key="", value=""))
+        self.request_header_list.bind_model(self.header_model, self.create_header_row);
+
+    def destroy_header_row(self, event_name: str, header_id: int):
+        header_count = self.header_model.get_n_items()
+
+        for index in range(header_count):
+            item = self.header_model.get_item(index)
+            if(index + 1 == header_count):
+                print(f"Item com ID {header_id} INGNORADO!")
+                return False
+
+            if item.id == header_id:
+                self.header_model.remove(index)
+                print(f"Item com ID {header_id} removido com sucesso!")
+                return True
+
+    def handler_headers(self, entry: GObject.Object, entry_type: str, header_model: GObject.Object):
+        new_id = header_model.id + 1
+        has_row = [header for header in self.header_model if header.id == new_id]
+
+        if not has_row:
+            self.header_model.append(Header(id=new_id, key="", value=""))
+
+        print(entry)
+        text_value = entry.get_text()
+        if entry_type == "key":
+            header_model.key = text_value
+        if entry_type == "value":
+            header_model.value = text_value
+
+    def create_header_row(self, model):
+        header_box = Gtk.Box(
+            margin_top= 8,
+            margin_start= 8,
+            margin_end= 8,
+            margin_bottom= 8,
+            halign="fill",
+            orientation="horizontal",
+        )
+        header_box.set_css_classes(["linked"])
+
+        key_entry = Gtk.Entry(
+            hexpand=True,
+            placeholder_text="Key",
+        )
+        key_entry.connect("changed", self.handler_headers, "key", model)
+
+        value_entry = Gtk.Entry(
+            hexpand=True,
+            placeholder_text="Value"
+        )
+
+        value_entry.connect("changed", self.handler_headers, "value", model)
+
+
+        close_button = Gtk.Button(
+            icon_name="edit-delete-symbolic",
+            tooltip_text="Remover item",
+            halign="center",
+            valign="center"
+        )
+
+        close_button.connect("clicked", self.destroy_header_row, model.id)
+
+        header_box.append(key_entry)
+        header_box.append(value_entry)
+        header_box.append(close_button)
+
+        self.request_header_list.append(header_box)
 
     @Gtk.Template.Callback()
     def on_changed(self, widget):
@@ -42,25 +114,4 @@ class ApiTestWindow(Adw.ApplicationWindow):
             text = widget.get_text()
             print(f"Live text: {text}")
             return
-
-    @Gtk.Template.Callback()
-    def on_changed(self, widget):
-
-        widget_name = widget.get_buildable_id()
-
-
-        if widget_name == 'url_entry':
-            text = widget.get_text()
-            print(f"Live text: {text}")
-            return
-
-        if widget._is_header:
-            header_id = widget.header_id
-
-            if not hasattr(headers, header_id):
-                headerRow = HeaderEntry()
-                headerRow.header_id(header_id + 1)
-
-
-            print(f'{header_id}')
 

@@ -46,7 +46,6 @@ configure_file(
 api_test_sources = [
   '__init__.py',
   'main.py',
-  'header_entry.py',
   'window.py',
 ]
 

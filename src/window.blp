@@ -140,53 +140,8 @@ template $ApiTestWindow: Adw.ApplicationWindow {
                     has-frame: false;
                     valign: start;
 
-                    ListBox {
-                      selection-mode: single;
-
-                      Gtk.ListBoxRow {
-                        Gtk.Box header_list {
-                          orientation: horizontal;
-                          halign: fill;
-                          margin-top: 8;
-                          margin-start: 8;
-                          margin-end: 8;
-                          margin-bottom: 8;
-                          spacing: 5;
-
-                          Gtk.Box {
-                            styles [
-                              "linked",
-                            ]
-
-                            $HeaderEntry header_key {
-                              hexpand: true;
-                              placeholder-text: _("Key");
-
-                              header-id: 1;
-
-                              changed => $on_changed();
-                            }
-
-                            $HeaderEntry header_value {
-                              hexpand: true;
-                              placeholder-text: _("Value");
-
-                              header-id: 1;
-
-                              changed => $on_changed();
-                            }
-                          }
-
-                          Gtk.Button {
-                            icon-name: "edit-delete-symbolic";
-                            tooltip-text: "Remover item";
-                            halign: center;
-                            valign: center;
-                            width-request: 32;
-                            height-request: 32;
-                          }
-                        }
-                      }
+                    Gtk.ListBox request_header_list {
+                      selection-mode: none;
 
                       styles [
                         "boxed-list",
