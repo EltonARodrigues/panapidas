@@ -28,11 +28,13 @@ class ApiTestWindow(Adw.ApplicationWindow):
 
     header_list = Gtk.Template.Child()
     request_header_list = Gtk.Template.Child()
+    request_params_list = Gtk.Template.Child()
 
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         MapListMenu(self.request_header_list)
+        MapListMenu(self.request_params_list)
 
     @Gtk.Template.Callback()
     def on_changed(self, widget):

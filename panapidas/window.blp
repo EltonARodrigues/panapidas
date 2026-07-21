@@ -115,6 +115,33 @@ template $ApiTestWindow: Adw.ApplicationWindow {
             Gtk.Stack stack {
               transition-type: crossfade;
               vexpand: false;
+              Gtk.StackPage {
+                name: "params";
+                title: _("params");
+
+                child: Box {
+                  orientation: vertical;
+                  spacing: 5;
+                  hexpand: true;
+                  vexpand: true;
+
+                  ScrolledWindow {
+                    max-content-height: 200;
+                    hscrollbar-policy: never;
+                    propagate-natural-height: true;
+                    has-frame: false;
+                    valign: start;
+
+                    Gtk.ListBox request_params_list {
+                      selection-mode: none;
+
+                      styles [
+                        "boxed-list",
+                      ]
+                    }
+                  }
+                };
+              }
 
               Gtk.StackPage {
                 name: "headers";
