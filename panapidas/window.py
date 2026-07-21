@@ -19,7 +19,7 @@
 
 from gi.repository import Adw
 from gi.repository import Gtk, GObject, Gio
-from panapidas.model.header import Header
+from panapidas.model.header import MapEntry
 
 
 @Gtk.Template(resource_path='/eltonarodrigues/org/codeberg/restest/window.ui')
@@ -32,8 +32,8 @@ class ApiTestWindow(Adw.ApplicationWindow):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.header_model = Gio.ListStore(item_type=Header)
-        self.header_model.append(Header(id=1, key="", value=""))
+        self.header_model = Gio.ListStore(item_type=MapEntry)
+        self.header_model.append(MapEntry(id=1, key="", value=""))
         self.request_header_list.bind_model(self.header_model, self.create_header_row);
 
     def destroy_header_row(self, event_name: str, header_id: int):
@@ -55,7 +55,7 @@ class ApiTestWindow(Adw.ApplicationWindow):
         has_row = [header for header in self.header_model if header.id == new_id]
 
         if not has_row:
-            self.header_model.append(Header(id=new_id, key="", value=""))
+            self.header_model.append(MapEntry(id=new_id, key="", value=""))
 
         print(entry)
         text_value = entry.get_text()

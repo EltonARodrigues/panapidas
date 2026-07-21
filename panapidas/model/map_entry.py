@@ -2,8 +2,8 @@ import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import GObject
 
-class Header(GObject.Object):
-    __gtype_name__ = 'Header'
+class MapEntry(GObject.Object):
+    __gtype_name__ = 'MapEntry'
 
     def __init__(self, id: int, key: str, value: str):
         super().__init__()
@@ -33,7 +33,7 @@ class Header(GObject.Object):
         self._value = value
 
     def __repr__(self):
-        return f"Header(id={self.id}, key={self.key}, value={self.value})"
+        return f"MapEntry(id={self.id}, key={self.key}, value={self.value})"
 
     def __str__(self):
         return f"{self._id} -> ({self._key}:{self._value})"
