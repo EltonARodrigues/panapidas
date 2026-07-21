@@ -47,6 +47,7 @@ class ApiTestWindow(Adw.ApplicationWindow):
             )
 
         self.body_params_list = Gtk.ListBox()
+        self.body_params_list.set_css_classes(["boxed-list"])
         self.body_params = MapListMenu(self.body_params_list)
 
 
