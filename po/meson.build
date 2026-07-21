@@ -1,1 +1,1 @@
-i18n.gettext('api-test', preset: 'glib')
+i18n.gettext('panapidas', preset: 'glib')

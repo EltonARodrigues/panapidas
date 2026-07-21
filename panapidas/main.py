@@ -53,7 +53,7 @@ class ApiTestApplication(Adw.Application):
 
     def on_about_action(self, *args):
         """Callback for the app.about action."""
-        about = Adw.AboutDialog(application_name='Api-test',
+        about = Adw.AboutDialog(application_name='panapidas',
                                 application_icon='eltonarodrigues.org.codeberg.restest',
                                 developer_name='Elton de Andrade Rodrigues',
                                 version='0.1.0',

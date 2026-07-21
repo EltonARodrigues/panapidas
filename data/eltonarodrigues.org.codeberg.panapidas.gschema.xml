@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="api-test">
+<schemalist gettext-domain="panapidas">
 	<schema id="eltonarodrigues.org.codeberg.restest" path="/eltonarodrigues/org/codeberg/restest/">
 	</schema>
 </schemalist>

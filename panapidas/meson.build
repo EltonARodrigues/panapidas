@@ -18,8 +18,8 @@ blueprints = custom_target('blueprints',
 )
 
 
-gnome.compile_resources('api-test',
-  'api-test.gresource.xml',
+gnome.compile_resources('panapidas',
+  'panapidas.gresource.xml',
   dependencies: blueprints,
   gresource_bundle: true,
   install: true,
@@ -35,18 +35,17 @@ conf.set('localedir', get_option('prefix') / get_option('localedir'))
 conf.set('pkgdatadir', pkgdatadir)
 
 configure_file(
-  input: 'api-test.in',
-  output: 'api-test',
+  input: 'panapidas.in',
+  output: 'panapidas',
   configuration: conf,
   install: true,
   install_dir: get_option('bindir'),
   install_mode: 'rwxr-xr-x'
 )
 
-api_test_sources = [
-  '__init__.py',
-  'main.py',
-  'window.py',
-]
-
-install_data(api_test_sources, install_dir: moduledir)
+install_subdir(
+  meson.current_source_dir(),
+  exclude_directories: ['.mypy_cache', '__pycache__'],
+  exclude_files: ['panapidas.in', 'meson.build'],
+  install_dir: python_dir,
+)

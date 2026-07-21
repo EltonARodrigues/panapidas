@@ -1,6 +1,6 @@
 #!@PYTHON@
 
-# api-test.in
+# panapidas.in
 #
 # Copyright 2026 Elton de Andrade Rodrigues
 #
@@ -31,17 +31,17 @@ localedir = '@localedir@'
 
 sys.path.insert(1, pkgdatadir)
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-locale.bindtextdomain('api-test', localedir)
-locale.textdomain('api-test')
-gettext.bindtextdomain('api-test', localedir)
-gettext.textdomain('api-test')
+locale.bindtextdomain('panapidas', localedir)
+locale.textdomain('panapidas')
+gettext.bindtextdomain('panapidas', localedir)
+gettext.textdomain('panapidas')
 
 if __name__ == '__main__':
     import gi
 
     from gi.repository import Gio
-    resource = Gio.Resource.load(os.path.join(pkgdatadir, 'api-test.gresource'))
+    resource = Gio.Resource.load(os.path.join(pkgdatadir, 'panapidas.gresource'))
     resource._register()
 
-    from api_test import main
+    from panapidas import main
     sys.exit(main.main(VERSION))

@@ -3,7 +3,7 @@
     "runtime" : "org.gnome.Sdk",
     "runtime-version" : "50",
     "sdk" : "org.gnome.Sdk",
-    "command" : "api-test",
+    "command" : "panapidas",
     "finish-args" : [
         "--share=network",
         "--share=ipc",
@@ -24,7 +24,7 @@
     ],
     "modules" : [
         {
-            "name" : "api-test",
+            "name" : "panapidas",
             "builddir" : true,
             "buildsystem" : "meson",
             "sources" : [

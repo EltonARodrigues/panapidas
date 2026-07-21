@@ -1,6 +1,6 @@
 [Desktop Entry]
-Name=Api-test
-Exec=api-test
+Name=panapidas
+Exec=panapidas
 Icon=eltonarodrigues.org.codeberg.restest
 Terminal=false
 Type=Application

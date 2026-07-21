@@ -19,7 +19,7 @@
 
 from gi.repository import Adw
 from gi.repository import Gtk, GObject, Gio
-from src.model.header import Header
+from panapidas.model.header import Header
 
 
 @Gtk.Template(resource_path='/eltonarodrigues/org/codeberg/restest/window.ui')
@@ -114,4 +114,5 @@ class ApiTestWindow(Adw.ApplicationWindow):
             text = widget.get_text()
             print(f"Live text: {text}")
             return
+
 
