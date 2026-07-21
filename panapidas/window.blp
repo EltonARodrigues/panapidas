@@ -91,14 +91,13 @@ template $ApiTestWindow: Adw.ApplicationWindow {
               Entry url_entry {
                 width-request: 450;
                 placeholder-text: _("Enter URL");
-
-                changed => $on_changed();
-
+                changed => $on_url_change();
               }
             }
 
             Button {
               label: _("SEND");
+              clicked => $on_send();
             }
           }
 
@@ -115,6 +114,7 @@ template $ApiTestWindow: Adw.ApplicationWindow {
             Gtk.Stack stack {
               transition-type: crossfade;
               vexpand: false;
+
               Gtk.StackPage {
                 name: "params";
                 title: _("params");
@@ -176,11 +176,11 @@ template $ApiTestWindow: Adw.ApplicationWindow {
                 title: _("Body");
 
                 child: Box {
-                              Gtk.TextView {
-              monospace: true;
-              hexpand: true;
-              vexpand: true;
-            }
+                  Gtk.TextView request_body{
+                    monospace: true;
+                    hexpand: true;
+                    vexpand: true;
+                  }
                 };
               }
             }

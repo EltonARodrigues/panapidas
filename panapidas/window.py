@@ -26,25 +26,28 @@ from panapidas.widget.map_list_menu import MapListMenu
 class ApiTestWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'ApiTestWindow'
 
-    header_list = Gtk.Template.Child()
+    http_method_list = Gtk.Template.Child()
     request_header_list = Gtk.Template.Child()
     request_params_list = Gtk.Template.Child()
+    request_body = Gtk.Template.Child()
 
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        MapListMenu(self.request_header_list)
-        MapListMenu(self.request_params_list)
+        self.url = ""
+        self.headers = MapListMenu(self.request_header_list)
+        self.params = MapListMenu(self.request_params_list)
+
 
     @Gtk.Template.Callback()
-    def on_changed(self, widget):
+    def on_send(self, widget):
+        print(f"URL: {self.url}")
+        print(f"Method: {self.http_method_list.props.selected_item.get_string()}")
+        print(f"Body {self.request_body}")
+        print(self.headers.get_map())
 
-        widget_name = widget.get_buildable_id()
 
-
-        if widget_name == 'url_entry':
-            text = widget.get_text()
-            print(f"Live text: {text}")
-            return
-
+    @Gtk.Template.Callback()
+    def on_url_change(self, entry: Gtk.Entry):
+        self.url = entry.get_text()
 

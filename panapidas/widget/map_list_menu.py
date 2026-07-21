@@ -31,6 +31,9 @@ class MapListMenu():
         self.list_model.append(MapEntry(id=1, key="", value=""))
         self.list_box.bind_model(self.list_model, self.create_list_row);
 
+    def get_map(self):
+        return [{ row.key: row.value } for row in self.list_model if len(row.key) > 0]
+
     def destroy_row(self, event_name: str, row_id: int):
         row_count = self.list_model.get_n_items()
 
@@ -52,7 +55,6 @@ class MapListMenu():
         if not has_row:
             self.list_model.append(MapEntry(id=new_id, key="", value=""))
 
-        print(entry)
         text_value = entry.get_text()
         if entry_type == "key":
             list_model.key = text_value
