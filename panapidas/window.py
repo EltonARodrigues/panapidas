@@ -25,8 +25,8 @@ from panapidas.page.request_page import RequestPage
 from panapidas.request.http_request import request
 
 @Gtk.Template(resource_path='/eltonarodrigues/org/codeberg/panapidas/window.ui')
-class ApiTestWindow(Adw.ApplicationWindow):
-    __gtype_name__ = 'ApiTestWindow'
+class PalapidasWindow(Adw.ApplicationWindow):
+    __gtype_name__ = 'PalapidasWindow'
 
     content_request = Gtk.Template.Child()
 

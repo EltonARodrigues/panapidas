@@ -26,14 +26,14 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Gio, Adw
-from .window import ApiTestWindow
+from .window import PalapidasWindow
 
 
-class ApiTestApplication(Adw.Application):
+class PalapidasApplication(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
-        super().__init__(application_id='eltonarodrigues.org.codeberg.restest',
+        super().__init__(application_id='eltonarodrigues.org.codeberg.palapidas',
                          flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
                          resource_base_path='/eltonarodrigues/org/codeberg/panapidas')
         self.create_action('quit', lambda *_: self.quit(), ['<control>q'])
@@ -48,13 +48,13 @@ class ApiTestApplication(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = ApiTestWindow(application=self)
+            win = PalapidasWindow(application=self)
         win.present()
 
     def on_about_action(self, *args):
         """Callback for the app.about action."""
         about = Adw.AboutDialog(application_name='panapidas',
-                                application_icon='eltonarodrigues.org.codeberg.restest',
+                                application_icon='eltonarodrigues.org.codeberg.palapidas',
                                 developer_name='Elton de Andrade Rodrigues',
                                 version='0.1.0',
                                 # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
@@ -85,5 +85,5 @@ class ApiTestApplication(Adw.Application):
 
 def main(version):
     """The application's entry point."""
-    app = ApiTestApplication()
+    app = PalapidasApplication()
     return app.run(sys.argv)

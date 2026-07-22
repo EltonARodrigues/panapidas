@@ -1,5 +1,5 @@
 {
-    "id" : "eltonarodrigues.org.codeberg.restest",
+    "id" : "eltonarodrigues.org.codeberg.palapidas",
     "runtime" : "org.gnome.Platform",
     "runtime-version" : "50",
     "sdk" : "org.gnome.Sdk",
