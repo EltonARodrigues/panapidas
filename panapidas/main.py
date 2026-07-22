@@ -35,7 +35,7 @@ class ApiTestApplication(Adw.Application):
     def __init__(self):
         super().__init__(application_id='eltonarodrigues.org.codeberg.restest',
                          flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
-                         resource_base_path='/eltonarodrigues/org/codeberg/restest')
+                         resource_base_path='/eltonarodrigues/org/codeberg/panapidas')
         self.create_action('quit', lambda *_: self.quit(), ['<control>q'])
         self.create_action('about', self.on_about_action)
         self.create_action('preferences', self.on_preferences_action)
