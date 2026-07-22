@@ -1,0 +1,45 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $RequestSidebar: Adw.NavigationPage {
+  title: _("Collections");
+
+  child: Adw.ToolbarView teste {
+    [top]
+    Adw.HeaderBar {
+      [end]
+      MenuButton new_item {
+        menu-model: button_new_menu;
+
+        Adw.ButtonContent {
+          icon-name: "list-add-symbolic";
+        }
+      }
+    }
+
+    content: ScrolledWindow {
+      child: ListView request_view {
+        styles [
+          "navigation-sidebar",
+        ]
+
+        factory: SignalListItemFactory factory {
+          setup => $setup_factory();
+          bind => $bind_factory();
+        };
+      };
+    };
+  };
+}
+
+menu button_new_menu {
+  item {
+    label: _("Folder");
+    action: 'create_folder';
+  }
+
+  item {
+    label: _("Request");
+    action: 'create_request';
+  }
+}

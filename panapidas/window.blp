@@ -7,36 +7,6 @@ template $PalapidasWindow: Adw.ApplicationWindow {
   default-height: 600;
 
   content: Adw.NavigationSplitView split_view {
-    sidebar: Adw.NavigationPage {
-      title: _("Collections");
-
-      child: Adw.ToolbarView {
-        [top]
-        Adw.HeaderBar {}
-
-        content: ScrolledWindow {
-          child: ListBox feed_list {
-            selection-mode: single;
-
-            styles [
-              "navigation-sidebar",
-            ]
-
-            ListBoxRow {
-              child: Label {
-                label: _("Request");
-                halign: start;
-                margin-start: 12;
-                margin-end: 12;
-                margin-top: 6;
-                margin-bottom: 6;
-              };
-            }
-          };
-        };
-      };
-    };
-
     content: Adw.NavigationPage {
       title: _("Request");
 
@@ -51,8 +21,6 @@ template $PalapidasWindow: Adw.ApplicationWindow {
             menu-model: primary_menu;
           }
         }
-
-        // content: $RequestPage TESTE{};
       };
     };
   };

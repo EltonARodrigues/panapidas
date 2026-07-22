@@ -28,7 +28,6 @@ class RequestPage(Adw.Bin):
     __gtype_name__ = 'RequestPage'
 
 
-    teste = Gtk.Template.Child()
     http_method_list = Gtk.Template.Child()
     request_header_list = Gtk.Template.Child()
     request_params_list = Gtk.Template.Child()

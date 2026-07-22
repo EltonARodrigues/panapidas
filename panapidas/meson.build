@@ -6,7 +6,8 @@ blueprints = custom_target('blueprints',
   input: files(
     'window.blp',
     'shortcuts-dialog.blp',
-    'page/request_page.blp'
+    'page/request_page.blp',
+    'widget/request_sidebar.blp'
   ),
   output: '.',
   command: [
