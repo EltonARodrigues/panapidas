@@ -3,7 +3,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gio, Adw, GObject
-from panapidas.model.requests import RequestGroup
+from panapidas.model.requests import Request, RequestGroup
 
 
 @Gtk.Template(
@@ -11,6 +11,10 @@ from panapidas.model.requests import RequestGroup
 )
 class RequestSidebar(Adw.NavigationPage):
     __gtype_name__ = "RequestSidebar"
+
+    __gsignals__ = {
+        'request-selected': (GObject.SignalFlags.RUN_FIRST, None, (Request,)),
+    }
 
     request_view = Gtk.Template.Child()
 
@@ -25,6 +29,7 @@ class RequestSidebar(Adw.NavigationPage):
         )
 
         self.selection = Gtk.SingleSelection.new(tree_model)
+        self.selection.connect("notify::selected", self.on_selected)
         self.request_view.set_model(self.selection)
 
     @staticmethod
@@ -37,7 +42,7 @@ class RequestSidebar(Adw.NavigationPage):
 
         store = Gio.ListStore.new(GObject.GObject)
 
-        if (item_type == "RequestGroup"):
+        if item_type == "RequestGroup":
             for child in item.children:
                 child_type = GObject.type_name(item.__gtype__)
                 store.append(child)
@@ -63,6 +68,16 @@ class RequestSidebar(Adw.NavigationPage):
 
         expander.props.list_row = tree_row
         item = tree_row.get_item()
+        # item.connect("click", self.teste)
         label.set_text(item.name)
 
+    def on_selected(self, selection: Gtk.SingleSelection, _):
+        selected = selection.get_selected_item()
+        item = selected.get_item()
+        item_type = GObject.type_name(item.__gtype__)
+
+        if item_type == "RequestGroup":
+            return;
+
+        self.emit('request-selected', item)
 

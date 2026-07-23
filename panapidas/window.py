@@ -51,21 +51,31 @@ class PalapidasWindow(Adw.ApplicationWindow):
         root_model = RequestGroup(
             "Root",
             [
-                RequestGroup("Collection 1", [Request("GET - test"), Request("POST - abc")]),
-                RequestGroup(
-                    "Collection 2",
-                    [
-                        Request("DELETE - afsfs"),
-                        Request("PATCH - ffff"),
-                        RequestGroup("Folder 1", [Request("GET - 1234")]),
-                    ],
-                ),
+                RequestGroup("Collection 1", [
+                    Request(
+                        name = "GET - test",
+                        method = "GET",
+                        url = "http://localhost:3000/api/test",
+                        headers=None,
+                        body=None
+                    ),
+                    Request(
+                        name = "POST - test 2",
+                        method = "POST",
+                        url = "http://localhost:800/api/test/1",
+                        headers=None,
+                        body=None
+                    )
+                ]),
             ]
         )
 
-        request_list = RequestSidebar(root_model)
-        self.split_view.set_sidebar(request_list)
+        sidebar = RequestSidebar(root_model)
+        self.split_view.set_sidebar(sidebar)
+        sidebar.connect('request-selected', self.on_request_selected)
 
-        request_page = RequestPage()
+
+    def on_request_selected(self, sidebar: RequestSidebar, request: Request):
+        request_page = RequestPage(request)
         self.content_request.set_content(request_page)
 

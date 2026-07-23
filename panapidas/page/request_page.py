@@ -22,6 +22,7 @@ from gi.repository import Gtk
 
 from panapidas.widget.map_list_menu import MapListMenu
 from panapidas.request.http_request import request
+from panapidas.model.requests import Request
 
 @Gtk.Template(resource_path='/eltonarodrigues/org/codeberg/panapidas/page/request_page.ui')
 class RequestPage(Adw.Bin):
@@ -29,14 +30,17 @@ class RequestPage(Adw.Bin):
 
 
     http_method_list = Gtk.Template.Child()
+    method_list = Gtk.Template.Child()
+    url_entry = Gtk.Template.Child()
     request_header_list = Gtk.Template.Child()
     request_params_list = Gtk.Template.Child()
     body_type_widget = Gtk.Template.Child()
 
-    def __init__(self, **kwargs):
+    def __init__(self, request: Request, **kwargs):
         super().__init__(**kwargs)
 
-        self.url = ""
+        self.http_method_list.set_selected(self.method_list.find(request.method))
+        self.url_entry.set_text(request.url)
         self.headers = MapListMenu(self.request_header_list)
         self.params = MapListMenu(self.request_params_list)
         self.request_text_body = Gtk.TextView(
