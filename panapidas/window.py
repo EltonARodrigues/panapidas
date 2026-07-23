@@ -23,22 +23,11 @@ import json
 from gi.repository import Adw
 from gi.repository import Gtk, GObject, Gio, GLib
 
-from panapidas.widget.map_list_menu import MapListMenu
 from panapidas.widget.request_sidebar import RequestSidebar
 from panapidas.page.request_page import RequestPage
 from panapidas.request.http_request import request
-from panapidas.model.requests import Request, RequestGroup
+from panapidas.model.requests import Request
 from panapidas.model.map_entry import MapEntry
-
-class TreeNode(GObject.Object):
-    def __init__(self, _title, _children=None):
-        super().__init__()
-        self.children = _children or []
-        self.item = Gtk.ListBoxRow().set_child(Gtk.Label(label=_title))
-
-    @GObject.Property(type=Gtk.ListBoxRow)
-    def item(self):
-        return self.item
 
 
 @Gtk.Template(resource_path="/eltonarodrigues/org/codeberg/panapidas/window.ui")
