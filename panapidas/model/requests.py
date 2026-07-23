@@ -14,13 +14,15 @@ class Request(GObject.GObject):
         method: str,
         url: str,
         headers: MapEntry,
-        body
+        body,
+        params: MapEntry
     ):
         super().__init__()
         self.name = name
         self.url = url
         self.method = method
         self.headers = headers
+        self.params = params
         self.body = body
 
 class RequestGroup(GObject.GObject):

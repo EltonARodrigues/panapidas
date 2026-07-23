@@ -25,10 +25,14 @@ from panapidas.model.map_entry import MapEntry
 class MapListMenu():
     __gtype_name__ = "MapListMenu"
 
-    def __init__(self, list_box: Gtk.ListBox):
+    def __init__(self, list_box: Gtk.ListBox, items = []):
         self.list_box = list_box
+        self.items = items.copy()
         self.list_model = Gio.ListStore(item_type=MapEntry)
-        self.list_model.append(MapEntry(id=1, key="", value=""))
+        print(self.items)
+        self.items.append(MapEntry(id=len(self.items)+1, key="", value=""))
+        print(items)
+        self.list_model.splice(0,0,additions=self.items)
         self.list_box.bind_model(self.list_model, self.create_list_row);
 
     def get_map(self):
@@ -75,12 +79,14 @@ class MapListMenu():
         key_entry = Gtk.Entry(
             hexpand=True,
             placeholder_text="Key",
+            text=model.key
         )
         key_entry.connect("changed", self.handler_typing, "key", model)
 
         value_entry = Gtk.Entry(
             hexpand=True,
-            placeholder_text="Value"
+            placeholder_text="Value",
+            text=model.value
         )
 
         value_entry.connect("changed", self.handler_typing, "value", model)

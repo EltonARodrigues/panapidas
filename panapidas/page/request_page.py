@@ -41,16 +41,24 @@ class RequestPage(Adw.Bin):
 
         self.http_method_list.set_selected(self.method_list.find(request.method))
         self.url_entry.set_text(request.url)
-        self.headers = MapListMenu(self.request_header_list)
-        self.params = MapListMenu(self.request_params_list)
+        self.headers = MapListMenu(self.request_header_list, request.headers)
+        self.params = MapListMenu(self.request_params_list, request.params)
         self.request_text_body = Gtk.TextView(
             monospace= True,
             hexpand= True,
             vexpand= True
         )
+
+        if type(request.body) == str:
+            buffer = self.request_text_body.get_buffer()
+            buffer.set_text(request.body)
+
         self.body_params_list = Gtk.ListBox()
         self.body_params_list.set_css_classes(["boxed-list"])
-        self.body_params = MapListMenu(self.body_params_list)
+
+        body_params_filter = request.body if type(request.body) == "list" else []
+        self.body_params = MapListMenu(self.body_params_list, body_params_filter)
+
 
     @staticmethod
     def get_text_view_value(viewer: Gtk.TextView):

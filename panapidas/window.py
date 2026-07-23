@@ -25,6 +25,7 @@ from panapidas.widget.request_sidebar import RequestSidebar
 from panapidas.page.request_page import RequestPage
 from panapidas.request.http_request import request
 from panapidas.model.requests import Request, RequestGroup
+from panapidas.model.map_entry import MapEntry
 
 class TreeNode(GObject.Object):
     def __init__(self, _title, _children=None):
@@ -38,9 +39,9 @@ class TreeNode(GObject.Object):
         return self.item
 
 
-@Gtk.Template(resource_path='/eltonarodrigues/org/codeberg/panapidas/window.ui')
+@Gtk.Template(resource_path="/eltonarodrigues/org/codeberg/panapidas/window.ui")
 class PalapidasWindow(Adw.ApplicationWindow):
-    __gtype_name__ = 'PalapidasWindow'
+    __gtype_name__ = "PalapidasWindow"
 
     split_view = Gtk.Template.Child()
     content_request = Gtk.Template.Child()
@@ -51,31 +52,55 @@ class PalapidasWindow(Adw.ApplicationWindow):
         root_model = RequestGroup(
             "Root",
             [
-                RequestGroup("Collection 1", [
-                    Request(
-                        name = "GET - test",
-                        method = "GET",
-                        url = "http://localhost:3000/api/test",
-                        headers=None,
-                        body=None
-                    ),
-                    Request(
-                        name = "POST - test 2",
-                        method = "POST",
-                        url = "http://localhost:800/api/test/1",
-                        headers=None,
-                        body=None
-                    )
-                ]),
-            ]
+                RequestGroup(
+                    "Collection 1",
+                    [
+                        Request(
+                            name="GET - test",
+                            method="GET",
+                            url="http://localhost:3000/api/test",
+                            headers=[
+                                MapEntry(
+                                    id=1, key="Content-Type", value="application/json"
+                                ),
+                                MapEntry(id=2, key="authorization", value="Bearer 123"),
+                            ],
+                            body=None,
+                            params=[]
+                        ),
+                        Request(
+                            name="POST - test 2",
+                            method="POST",
+                            url="http://localhost:800/api/test/1",
+                            headers=[],
+                            body=None,
+                            params=[
+                                MapEntry(
+                                    id=1, key="teste", value="a1234"
+                                )
+                            ]
+                        ),
+                        Request(
+                            name="PUT - test 3",
+                            method="PUT",
+                            url="http://localhost:800/api/aaa/bbbb",
+                            headers=[],
+                            body='{"teste: 1, "ideia":"home"}',
+                            params=[
+                                MapEntry(
+                                    id=1, key="teste", value="a1234"
+                                )
+                            ]
+                        ),
+                    ],
+                ),
+            ],
         )
 
         sidebar = RequestSidebar(root_model)
         self.split_view.set_sidebar(sidebar)
-        sidebar.connect('request-selected', self.on_request_selected)
-
+        sidebar.connect("request-selected", self.on_request_selected)
 
     def on_request_selected(self, sidebar: RequestSidebar, request: Request):
         request_page = RequestPage(request)
         self.content_request.set_content(request_page)
-
