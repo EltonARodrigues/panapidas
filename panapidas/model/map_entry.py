@@ -38,4 +38,9 @@ class MapEntry(GObject.Object):
     def __str__(self):
         return f"{self._id} -> ({self._key}:{self._value})"
 
-
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "key": self.key,
+            "value": self.value,
+        }

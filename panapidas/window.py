@@ -17,8 +17,11 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import os
+import json
+
 from gi.repository import Adw
-from gi.repository import Gtk, GObject, Gio
+from gi.repository import Gtk, GObject, Gio, GLib
 
 from panapidas.widget.map_list_menu import MapListMenu
 from panapidas.widget.request_sidebar import RequestSidebar
@@ -46,58 +49,11 @@ class PalapidasWindow(Adw.ApplicationWindow):
     split_view = Gtk.Template.Child()
     content_request = Gtk.Template.Child()
 
-    def __init__(self, **kwargs):
+    def __init__(self, requests=None, **kwargs):
         super().__init__(**kwargs)
+        print(requests)
 
-        root_model = RequestGroup(
-            "Root",
-            [
-                RequestGroup(
-                    "Collection 1",
-                    [
-                        Request(
-                            name="GET - test",
-                            method="GET",
-                            url="http://localhost:3000/api/test",
-                            headers=[
-                                MapEntry(
-                                    id=1, key="Content-Type", value="application/json"
-                                ),
-                                MapEntry(id=2, key="authorization", value="Bearer 123"),
-                            ],
-                            body=None,
-                            params=[]
-                        ),
-                        Request(
-                            name="POST - test 2",
-                            method="POST",
-                            url="http://localhost:800/api/test/1",
-                            headers=[],
-                            body=None,
-                            params=[
-                                MapEntry(
-                                    id=1, key="teste", value="a1234"
-                                )
-                            ]
-                        ),
-                        Request(
-                            name="PUT - test 3",
-                            method="PUT",
-                            url="http://localhost:800/api/aaa/bbbb",
-                            headers=[],
-                            body='{"teste: 1, "ideia":"home"}',
-                            params=[
-                                MapEntry(
-                                    id=1, key="teste", value="a1234"
-                                )
-                            ]
-                        ),
-                    ],
-                ),
-            ],
-        )
-
-        sidebar = RequestSidebar(root_model)
+        sidebar = RequestSidebar(requests)
         self.split_view.set_sidebar(sidebar)
         sidebar.connect("request-selected", self.on_request_selected)
 

@@ -19,26 +19,51 @@
 
 import sys
 import gi
+import os
+import json
 
 from gettext import gettext as _
 
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 
-from gi.repository import Gtk, Gio, Adw
+from gi.repository import Gtk, Gio, Adw, GLib
+
+from panapidas.model.requests import Request, RequestGroup
 from .window import PalapidasWindow
+
+APPLICATION_NAME = "panapidas"
+APPLICATION_DATA_FILENAME = "requests.json"
 
 
 class PalapidasApplication(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
-        super().__init__(application_id='eltonarodrigues.org.codeberg.palapidas',
-                         flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
-                         resource_base_path='/eltonarodrigues/org/codeberg/panapidas')
-        self.create_action('quit', lambda *_: self.quit(), ['<control>q'])
-        self.create_action('about', self.on_about_action)
-        self.create_action('preferences', self.on_preferences_action)
+        super().__init__(
+            application_id="eltonarodrigues.org.codeberg.palapidas",
+            flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
+            resource_base_path="/eltonarodrigues/org/codeberg/panapidas",
+        )
+        self.create_action("quit", lambda *_: self.quit(), ["<control>q"])
+        self.create_action("about", self.on_about_action)
+        self.create_action("preferences", self.on_preferences_action)
+
+        print(GLib.get_user_config_dir())
+
+    def load_data(self):
+        data_dir = GLib.get_user_data_dir()
+        app_dir = os.path.join(data_dir, APPLICATION_NAME)
+        data_path = os.path.join(app_dir, APPLICATION_DATA_FILENAME)
+
+        if not os.path.exists(data_path):
+            print("Arquivo não encontrado. Retornando lista vazia.")
+            return []
+
+        with open(data_path, "r", encoding="utf-8") as f:
+            requests_dict = json.load(f)
+
+        return RequestGroup(requests_dict["name"], requests_dict["children"])
 
     def do_activate(self):
         """Called when the application is activated.
@@ -46,26 +71,31 @@ class PalapidasApplication(Adw.Application):
         We raise the application's main window, creating it if
         necessary.
         """
+
+        requests = self.load_data()
+
         win = self.props.active_window
         if not win:
-            win = PalapidasWindow(application=self)
+            win = PalapidasWindow(application=self, requests=requests)
         win.present()
 
     def on_about_action(self, *args):
         """Callback for the app.about action."""
-        about = Adw.AboutDialog(application_name='panapidas',
-                                application_icon='eltonarodrigues.org.codeberg.palapidas',
-                                developer_name='Elton de Andrade Rodrigues',
-                                version='0.1.0',
-                                # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
-                                translator_credits = _('translator-credits'),
-                                developers=['Elton de Andrade Rodrigues'],
-                                copyright='© 2026 Elton de Andrade Rodrigues')
+        about = Adw.AboutDialog(
+            application_name=APPLICATION_NAME,
+            application_icon="eltonarodrigues.org.codeberg.palapidas",
+            developer_name="Elton de Andrade Rodrigues",
+            version="0.1.0",
+            # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
+            translator_credits=_("translator-credits"),
+            developers=["Elton de Andrade Rodrigues"],
+            copyright="© 2026 Elton de Andrade Rodrigues",
+        )
         about.present(self.props.active_window)
 
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
-        print('app.preferences action activated')
+        print("app.preferences action activated")
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.
