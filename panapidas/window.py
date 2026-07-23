@@ -34,7 +34,6 @@ class TreeNode(GObject.Object):
     def __init__(self, _title, _children=None):
         super().__init__()
         self.children = _children or []
-        # self.title = _title
         self.item = Gtk.ListBoxRow().set_child(Gtk.Label(label=_title))
 
     @GObject.Property(type=Gtk.ListBoxRow)
@@ -51,12 +50,15 @@ class PalapidasWindow(Adw.ApplicationWindow):
 
     def __init__(self, requests=None, **kwargs):
         super().__init__(**kwargs)
-        print(requests)
+
+        self.request_pages = {}
 
         sidebar = RequestSidebar(requests)
         self.split_view.set_sidebar(sidebar)
         sidebar.connect("request-selected", self.on_request_selected)
 
     def on_request_selected(self, sidebar: RequestSidebar, request: Request):
-        request_page = RequestPage(request)
-        self.content_request.set_content(request_page)
+        if request.id not in self.request_pages:
+            self.request_pages[request.id] = RequestPage(request)
+
+        self.content_request.set_content(self.request_pages[request.id])

@@ -1,5 +1,6 @@
-import gi
+import uuid
 
+import gi
 gi.require_version("Gtk", "4.0")
 from gi.repository import GObject
 
@@ -11,6 +12,7 @@ class Request(GObject.GObject):
 
     def __init__(
         self,
+        id: str,
         name: str,
         method: str,
         url: str,
@@ -19,6 +21,7 @@ class Request(GObject.GObject):
         params: MapEntry,
     ):
         super().__init__()
+        self._id = id,
         self.name = name
         self.url = url
         self.method = method
@@ -26,8 +29,13 @@ class Request(GObject.GObject):
         self.params = params
         self.body = body
 
+    @GObject.Property(type=str)
+    def id(self):
+        return self._id[0]
+
     def to_dict(self):
         return {
+            "id": self.id,
             "name": self.name,
             "url": self.url,
             "method": self.method,
@@ -66,8 +74,10 @@ class RequestGroup(GObject.GObject):
                     RequestGroup(children["name"], children["children"])
                 )
                 continue
+
             children_object.append(
                 Request(
+                    id=children["id"],
                     name=children["name"],
                     url=children["url"],
                     method=children["method"],
