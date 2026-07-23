@@ -17,23 +17,36 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from typing import List
+
 from gi.repository import Adw
 from gi.repository import Gtk, GObject, Gio
 from panapidas.model.map_entry import MapEntry
 
 
-class MapListMenu():
+class MapListMenu(GObject.Object):
     __gtype_name__ = "MapListMenu"
 
+    __gsignals__ = {
+        'map-changed': (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+    }
+
     def __init__(self, list_box: Gtk.ListBox, items = []):
+        super().__init__()
         self.list_box = list_box
         self.items = items.copy()
-        self.list_model = Gio.ListStore(item_type=MapEntry)
-        print(self.items)
         self.items.append(MapEntry(id=len(self.items)+1, key="", value=""))
-        print(items)
+
+        self.list_model = Gio.ListStore(item_type=MapEntry)
         self.list_model.splice(0,0,additions=self.items)
         self.list_box.bind_model(self.list_model, self.create_list_row);
+
+    def on_map_change(self):
+        # items = [row for row in self.list_model if len(row.key) > 0]
+        self.emit('map-changed')
+
+    def get_map_entry(self):
+        return [row for row in self.list_model if len(row.key) > 0]
 
     def get_map(self):
         return [{ row.key: row.value } for row in self.list_model if len(row.key) > 0]
@@ -51,6 +64,7 @@ class MapListMenu():
                 self.list_model.remove(index)
                 print(f"Item com ID {row_id} removido com sucesso!")
                 return True
+        self.on_map_change()
 
     def handler_typing(self, entry: GObject.Object, entry_type: str, list_model: GObject.Object):
         new_id = list_model.id + 1
@@ -64,6 +78,7 @@ class MapListMenu():
             list_model.key = text_value
         if entry_type == "value":
             list_model.value = text_value
+        self.on_map_change()
 
     def create_list_row(self, model):
         linked_box = Gtk.Box(

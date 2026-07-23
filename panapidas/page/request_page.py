@@ -21,13 +21,13 @@ from gi.repository import Adw
 from gi.repository import Gtk
 
 from panapidas.widget.map_list_menu import MapListMenu
+from panapidas.model.map_entry import MapEntry
 from panapidas.request.http_request import request
 from panapidas.model.requests import Request
 
 @Gtk.Template(resource_path='/eltonarodrigues/org/codeberg/panapidas/page/request_page.ui')
 class RequestPage(Adw.Bin):
     __gtype_name__ = 'RequestPage'
-
 
     http_method_list = Gtk.Template.Child()
     method_list = Gtk.Template.Child()
@@ -39,19 +39,27 @@ class RequestPage(Adw.Bin):
     def __init__(self, request: Request, **kwargs):
         super().__init__(**kwargs)
 
+        self.request = request
         self.http_method_list.set_selected(self.method_list.find(request.method))
+
         self.url_entry.set_text(request.url)
+
         self.headers = MapListMenu(self.request_header_list, request.headers)
+        self.headers.connect("map-changed", self.on_map_change, "headers")
+
         self.params = MapListMenu(self.request_params_list, request.params)
+        self.params.connect("map-changed", self.on_map_change, "params")
+
         self.request_text_body = Gtk.TextView(
             monospace= True,
             hexpand= True,
             vexpand= True
         )
 
+        buffer = self.request_text_body.get_buffer()
         if type(request.body) == str:
-            buffer = self.request_text_body.get_buffer()
             buffer.set_text(request.body)
+        buffer.connect("changed", self.on_request_body_change)
 
         self.body_params_list = Gtk.ListBox()
         self.body_params_list.set_css_classes(["boxed-list"])
@@ -87,14 +95,9 @@ class RequestPage(Adw.Bin):
             error_count=0
         )
 
-        print(response)
         buffer = self.response_body.get_buffer()
         buffer.set_text(response.body)
 
-
-    @Gtk.Template.Callback()
-    def on_url_change(self, entry: Gtk.Entry):
-        self.url = entry.get_text()
 
     @Gtk.Template.Callback()
     def on_body_type_change(self, widget: Adw.ToggleGroup, active_name: str):
@@ -108,4 +111,28 @@ class RequestPage(Adw.Bin):
             self.body_type_widget.append(self.request_text_body)
         if body_type == "form_data" or body_type == "form_urlencoded":
             self.body_type_widget.append(self.body_params_list)
+
+    @Gtk.Template.Callback()
+    def on_method_change(self, widget, _):
+        method=widget.props.selected_item.get_string()
+        self.request.method = method
+
+    @Gtk.Template.Callback()
+    def on_url_change(self, widget):
+        self.request.url = widget.get_text()
+
+    def on_map_change(self, widget, type: str):
+        values = widget.get_map_entry()
+
+        if type == "params":
+            self.request.params = values
+        if type == "headers":
+            self.request.headers = values
+
+    def on_request_body_change(self, buffer):
+        start_iter = buffer.get_start_iter()
+        end_iter = buffer.get_end_iter()
+
+        return buffer.get_text(start_iter, end_iter, True)
+        self.request.body = widget.get_text()
 

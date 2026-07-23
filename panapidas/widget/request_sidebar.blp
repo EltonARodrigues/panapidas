@@ -8,12 +8,11 @@ template $RequestSidebar: Adw.NavigationPage {
     [top]
     Adw.HeaderBar {
       [end]
-      MenuButton new_item {
-        menu-model: button_new_menu;
-
-        Adw.ButtonContent {
-          icon-name: "list-add-symbolic";
-        }
+      MenuButton {
+        primary: true;
+        icon-name: "open-menu-symbolic";
+        tooltip-text: _("Main Menu");
+        menu-model: primary_menu;
       }
     }
 
@@ -32,14 +31,33 @@ template $RequestSidebar: Adw.NavigationPage {
   };
 }
 
-menu button_new_menu {
-  item {
-    label: _("Folder");
-    action: 'create_folder';
+menu primary_menu {
+  section {
+    item {
+      label: _("New Folder");
+      action: 'create_folder';
+    }
+
+    item {
+      label: _("New Request");
+      action: 'create_request';
+    }
   }
 
-  item {
-    label: _("Request");
-    action: 'create_request';
+  section {
+    item {
+      label: _("_Preferences");
+      action: "app.preferences";
+    }
+
+    item {
+      label: _("_Keyboard Shortcuts");
+      action: "app.shortcuts";
+    }
+
+    item {
+      label: _("_About Gazette");
+      action: "app.about";
+    }
   }
 }

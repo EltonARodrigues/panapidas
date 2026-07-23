@@ -34,14 +34,22 @@ from panapidas.model.map_entry import MapEntry
 class PalapidasWindow(Adw.ApplicationWindow):
     __gtype_name__ = "PalapidasWindow"
 
+    __gsignals__ = {
+        'save-requests': (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
+    }
+
     split_view = Gtk.Template.Child()
     content_request = Gtk.Template.Child()
+    request_navigation = Gtk.Template.Child()
+    save_request_button = Gtk.Template.Child()
 
     def __init__(self, requests=None, **kwargs):
         super().__init__(**kwargs)
 
         self.request_pages = {}
+        self.save_request_button.set_visible(False)
 
+        self.requests = requests
         sidebar = RequestSidebar(requests)
         self.split_view.set_sidebar(sidebar)
         sidebar.connect("request-selected", self.on_request_selected)
@@ -50,4 +58,10 @@ class PalapidasWindow(Adw.ApplicationWindow):
         if request.id not in self.request_pages:
             self.request_pages[request.id] = RequestPage(request)
 
+        self.request_navigation.set_title(request.name)
+        self.save_request_button.set_visible(True)
         self.content_request.set_content(self.request_pages[request.id])
+
+    @Gtk.Template.Callback()
+    def on_request_save(self, _):
+        self.emit("save-requests")

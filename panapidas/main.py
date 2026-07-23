@@ -27,9 +27,10 @@ from gettext import gettext as _
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Gtk, Gio, Adw, GLib
+from gi.repository import Gtk, Gio, Adw
 
 from panapidas.model.requests import Request, RequestGroup
+from panapidas.data_management import DataManagement
 from .window import PalapidasWindow
 
 APPLICATION_NAME = "panapidas"
@@ -45,25 +46,14 @@ class PalapidasApplication(Adw.Application):
             flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
             resource_base_path="/eltonarodrigues/org/codeberg/panapidas",
         )
+        self.dataManagement = DataManagement()
+
         self.create_action("quit", lambda *_: self.quit(), ["<control>q"])
         self.create_action("about", self.on_about_action)
         self.create_action("preferences", self.on_preferences_action)
 
-        print(GLib.get_user_config_dir())
-
-    def load_data(self):
-        data_dir = GLib.get_user_data_dir()
-        app_dir = os.path.join(data_dir, APPLICATION_NAME)
-        data_path = os.path.join(app_dir, APPLICATION_DATA_FILENAME)
-
-        if not os.path.exists(data_path):
-            print("Arquivo não encontrado. Retornando lista vazia.")
-            return []
-
-        with open(data_path, "r", encoding="utf-8") as f:
-            requests_dict = json.load(f)
-
-        return RequestGroup(requests_dict["name"], requests_dict["children"])
+    def on_save_request(self, _, requestGroup: RequestGroup):
+        self.dataManagement.save(requestGroup)
 
     def do_activate(self):
         """Called when the application is activated.
@@ -72,11 +62,12 @@ class PalapidasApplication(Adw.Application):
         necessary.
         """
 
-        requests = self.load_data()
+        requests = self.dataManagement.load()
 
         win = self.props.active_window
         if not win:
             win = PalapidasWindow(application=self, requests=requests)
+            win.connect("save-requests", self.on_save_request, requests)
         win.present()
 
     def on_about_action(self, *args):

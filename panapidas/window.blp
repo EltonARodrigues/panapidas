@@ -7,40 +7,24 @@ template $PalapidasWindow: Adw.ApplicationWindow {
   default-height: 600;
 
   content: Adw.NavigationSplitView split_view {
-    content: Adw.NavigationPage {
+    content: Adw.NavigationPage request_navigation {
       title: _("Request");
 
       child: Adw.ToolbarView content_request {
         [top]
         Adw.HeaderBar {
+
           [end]
-          MenuButton {
-            primary: true;
-            icon-name: "open-menu-symbolic";
-            tooltip-text: _("Main Menu");
-            menu-model: primary_menu;
+          Button save_request_button {
+            // sensitive: false;
+            label: _("Save");
+
+            styles ["suggested-action"]
+
+            clicked => $on_request_save();
           }
         }
       };
     };
   };
-}
-
-menu primary_menu {
-  section {
-    item {
-      label: _("_Preferences");
-      action: "app.preferences";
-    }
-
-    item {
-      label: _("_Keyboard Shortcuts");
-      action: "app.shortcuts";
-    }
-
-    item {
-      label: _("_About Gazette");
-      action: "app.about";
-    }
-  }
 }
