@@ -5,32 +5,5 @@ template $ItemPopover: PopoverMenu {
   has-arrow: true;
   autohide: true;
   position: bottom;
-
-  menu-model: item_popover_model;
 }
 
-menu item_popover_model {
-  section {
-    item {
-      label: "New Request";
-      action: "app.new_request";
-    }
-
-    item {
-      label: "New Folder";
-      action: "app.new_folder";
-    }
-  }
-
-  section {
-    item {
-      label: "Rename";
-      action: "app.rename";
-    }
-
-    item {
-      label: "Remove";
-      action: "app.remove";
-    }
-  }
-}

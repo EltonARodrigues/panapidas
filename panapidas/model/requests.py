@@ -51,9 +51,10 @@ class Request(RequestItem):
 class RequestGroup(RequestItem):
     __gtype_name__ = "RequestGroup"
 
-    def __init__(self, name, children_list=[]):
+    def __init__(self, id= None, name=None, children_list=[]):
 
         super().__init__()
+        self.id = str(uuid.uuid4()) if id is None else id
         self.name = name
         self.children = RequestGroup._children_builder(children_list)
 
@@ -74,7 +75,7 @@ class RequestGroup(RequestItem):
         for children in children_list:
             if "children" in children:
                 children_object.append(
-                    RequestGroup(children["name"], children["children"])
+                    RequestGroup(id=children["id"], name=children["name"], children_list=children["children"])
                 )
                 continue
 
@@ -94,6 +95,7 @@ class RequestGroup(RequestItem):
 
     def to_dict(self):
         return {
+            "id": self.id,
             "name": self.name,
             "children": [children.to_dict() for children in self.children],
         }

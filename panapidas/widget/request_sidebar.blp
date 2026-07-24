@@ -12,7 +12,7 @@ template $RequestSidebar: Adw.NavigationPage {
         primary: true;
         icon-name: "open-menu-symbolic";
         tooltip-text: _("Main Menu");
-        menu-model: primary_menu;
+        menu-model: request_item_menu;
       }
     }
 
@@ -31,7 +31,7 @@ template $RequestSidebar: Adw.NavigationPage {
   };
 }
 
-menu primary_menu {
+menu request_item_menu {
   section {
     item {
       label: _("New Folder");

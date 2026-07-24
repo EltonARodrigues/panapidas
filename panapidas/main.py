@@ -27,7 +27,7 @@ from gettext import gettext as _
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Gtk, Gio, Adw
+from gi.repository import Gtk, Gio, Adw, GLib
 
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.data_management import DataManagement
@@ -52,11 +52,13 @@ class PalapidasApplication(Adw.Application):
         self.request_group_store.splice(0,0,additions=self.request_group.children)
 
 
-        self.create_action("quit", lambda *_: self.quit(), ["<control>q"])
+        self.create_action("quit", lambda *_: self.quit(), None, ["<control>q"])
         self.create_action("about", self.on_about_action)
         self.create_action("preferences", self.on_preferences_action)
         self.create_action("create_folder", self.on_create)
         self.create_action("create_request", self.on_create)
+        self.create_action("create-sub-folder", self.on_create, GLib.VariantType.new("s"))
+        self.create_action("create-sub-request", self.on_create, GLib.VariantType.new("s"))
 
     def on_save_request(self, _):
         self.dataManagement.save(self.request_group)
@@ -92,8 +94,8 @@ class PalapidasApplication(Adw.Application):
         """Callback for the app.preferences action."""
         print("app.preferences action activated")
 
-    def on_create(self, widget, _):
-        action_name = widget.get_name()
+    def on_create(self, action: Gio.SimpleAction, _):
+        action_name = action.get_name()
         if action_name == "create_folder":
             new_group = RequestGroup(name= "New Group")
             self.request_group.children.append(new_group)
@@ -106,7 +108,7 @@ class PalapidasApplication(Adw.Application):
 
         self.dataManagement.save(self.request_group)
 
-    def create_action(self, name, callback, shortcuts=None):
+    def create_action(self, name, callback, target=None, shortcuts=None):
         """Add an application action.
 
         Args:
@@ -115,7 +117,8 @@ class PalapidasApplication(Adw.Application):
               activated
             shortcuts: an optional list of accelerators
         """
-        action = Gio.SimpleAction.new(name, None)
+
+        action = Gio.SimpleAction.new(name, target)
         action.connect("activate", callback)
         self.add_action(action)
         if shortcuts:
@@ -126,3 +129,4 @@ def main(version):
     """The application's entry point."""
     app = PalapidasApplication()
     return app.run(sys.argv)
+

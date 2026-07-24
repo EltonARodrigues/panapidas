@@ -25,7 +25,7 @@ class DataManagement():
         with open(self.data_path, "r", encoding="utf-8") as f:
             requests_dict = json.load(f)
 
-        return RequestGroup(requests_dict["name"], requests_dict["children"])
+        return RequestGroup(requests_dict["id"], requests_dict["name"], requests_dict["children"])
 
     def save(self, requestGroup: RequestGroup):
         os.makedirs(self.app_dir, exist_ok=True)
