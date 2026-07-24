@@ -5,5 +5,6 @@
     <file preprocess="xml-stripblanks">shortcuts-dialog.ui</file>
     <file preprocess="xml-stripblanks">page/request_page.ui</file>
     <file preprocess="xml-stripblanks">widget/request_sidebar.ui</file>
+    <file preprocess="xml-stripblanks">widget/item_popover.ui</file>
   </gresource>
 </gresources>

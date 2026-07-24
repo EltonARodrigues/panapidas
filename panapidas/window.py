@@ -64,3 +64,4 @@ class PalapidasWindow(Adw.ApplicationWindow):
     @Gtk.Template.Callback()
     def on_request_save(self, _):
         self.emit("save-requests")
+

@@ -2,9 +2,12 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Gio, Adw, GObject
-from panapidas.model.requests import Request, RequestGroup
+from gi.repository import Gtk, Gio, Adw, GObject, Gdk
 
+from panapidas.model.requests import Request, RequestGroup
+from panapidas.widget.item_popover import ItemPopover
+
+RIGHT_MOUSE_BUTTON = 3
 
 @Gtk.Template(
     resource_path="/eltonarodrigues/org/codeberg/panapidas/widget/request_sidebar.ui"
@@ -25,6 +28,8 @@ class RequestSidebar(Adw.NavigationPage):
             store, False, True, RequestSidebar.create_model_func
         )
 
+        self.popover = ItemPopover()
+
         self.selection = Gtk.SingleSelection.new(tree_model)
         self.selection.connect("notify::selected", self.on_selected)
         self.request_view.set_model(self.selection)
@@ -38,7 +43,7 @@ class RequestSidebar(Adw.NavigationPage):
             return None
 
         store = Gio.ListStore.new(GObject.GObject)
-        print(item_type)
+
         if item_type == "RequestGroup":
             for child in item.children:
                 child_type = GObject.type_name(item.__gtype__)
@@ -60,13 +65,23 @@ class RequestSidebar(Adw.NavigationPage):
         expander = list_item.get_child()
         label = expander.get_child()
 
-
         tree_row = list_item.get_item()
+
+        gesture = Gtk.GestureClick()
+
+        gesture.set_button(RIGHT_MOUSE_BUTTON)
+        gesture.connect("pressed", self.on_cell_right_click, expander)
+        expander.add_controller(gesture)
 
         expander.props.list_row = tree_row
         item = tree_row.get_item()
-        # item.connect("click", self.teste)
         label.set_text(item.name)
+
+    def on_cell_right_click(self, gesture, n_press, x, y, item):
+        """Exibe o popover na célula clicada."""
+        self.popover.unparent()
+        self.popover.set_parent(item)
+        self.popover.show()
 
     def on_selected(self, selection: Gtk.SingleSelection, _):
         selected = selection.get_selected_item()
