@@ -29,7 +29,7 @@ gi.require_version("Adw", "1")
 
 from gi.repository import Gtk, Gio, Adw
 
-from panapidas.model.requests import Request, RequestGroup
+from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.data_management import DataManagement
 from .window import PalapidasWindow
 
@@ -47,13 +47,19 @@ class PalapidasApplication(Adw.Application):
             resource_base_path="/eltonarodrigues/org/codeberg/panapidas",
         )
         self.dataManagement = DataManagement()
+        self.request_group = self.dataManagement.load()
+        self.request_group_store = Gio.ListStore.new(RequestItem)
+        self.request_group_store.splice(0,0,additions=self.request_group.children)
+
 
         self.create_action("quit", lambda *_: self.quit(), ["<control>q"])
         self.create_action("about", self.on_about_action)
         self.create_action("preferences", self.on_preferences_action)
+        self.create_action("create_folder", self.on_create)
+        self.create_action("create_request", self.on_create)
 
-    def on_save_request(self, _, requestGroup: RequestGroup):
-        self.dataManagement.save(requestGroup)
+    def on_save_request(self, _):
+        self.dataManagement.save(self.request_group)
 
     def do_activate(self):
         """Called when the application is activated.
@@ -62,12 +68,10 @@ class PalapidasApplication(Adw.Application):
         necessary.
         """
 
-        requests = self.dataManagement.load()
-
         win = self.props.active_window
         if not win:
-            win = PalapidasWindow(application=self, requests=requests)
-            win.connect("save-requests", self.on_save_request, requests)
+            win = PalapidasWindow(application=self, request_group=self.request_group_store)
+            win.connect("save-requests", self.on_save_request)
         win.present()
 
     def on_about_action(self, *args):
@@ -87,6 +91,20 @@ class PalapidasApplication(Adw.Application):
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
         print("app.preferences action activated")
+
+    def on_create(self, widget, _):
+        action_name = widget.get_name()
+        if action_name == "create_folder":
+            new_group = RequestGroup(name= "New Group")
+            self.request_group.children.append(new_group)
+            self.request_group_store.append(new_group)
+
+        if action_name == "create_request":
+            new_request = Request(name= "New Request")
+            self.request_group.children.append(new_request)
+            self.request_group_store.append(new_request)
+
+        self.dataManagement.save(self.request_group)
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.

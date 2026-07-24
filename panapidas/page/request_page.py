@@ -40,9 +40,10 @@ class RequestPage(Adw.Bin):
         super().__init__(**kwargs)
 
         self.request = request
-        self.http_method_list.set_selected(self.method_list.find(request.method))
 
-        self.url_entry.set_text(request.url)
+        self.http_method_list.set_selected(self.method_list.find(request.method or "GET"))
+
+        self.url_entry.set_text(request.url or "")
 
         self.headers = MapListMenu(self.request_header_list, request.headers)
         self.headers.connect("map-changed", self.on_map_change, "headers")

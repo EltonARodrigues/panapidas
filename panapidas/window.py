@@ -26,7 +26,7 @@ from gi.repository import Gtk, GObject, Gio, GLib
 from panapidas.widget.request_sidebar import RequestSidebar
 from panapidas.page.request_page import RequestPage
 from panapidas.request.http_request import request
-from panapidas.model.requests import Request
+from panapidas.model.requests import Request, RequestGroup
 from panapidas.model.map_entry import MapEntry
 
 
@@ -43,14 +43,13 @@ class PalapidasWindow(Adw.ApplicationWindow):
     request_navigation = Gtk.Template.Child()
     save_request_button = Gtk.Template.Child()
 
-    def __init__(self, requests=None, **kwargs):
+    def __init__(self, request_group: RequestGroup = None, **kwargs):
         super().__init__(**kwargs)
 
         self.request_pages = {}
         self.save_request_button.set_visible(False)
 
-        self.requests = requests
-        sidebar = RequestSidebar(requests)
+        sidebar = RequestSidebar(request_group)
         self.split_view.set_sidebar(sidebar)
         sidebar.connect("request-selected", self.on_request_selected)
 

@@ -7,21 +7,24 @@ from gi.repository import GObject
 from panapidas.model.map_entry import MapEntry
 
 
-class Request(GObject.GObject):
+class RequestItem(GObject.GObject):
+    __gtype_name__ = "RequestItem"
+
+class Request(RequestItem):
     __gtype_name__ = "Request"
 
     def __init__(
         self,
-        id: str,
-        name: str,
-        method: str,
-        url: str,
-        headers: MapEntry,
-        body,
-        params: MapEntry,
+        id: str = None,
+        name: str = None,
+        method: str = None,
+        url: str = None,
+        headers: MapEntry = [],
+        body = None,
+        params: MapEntry = [],
     ):
         super().__init__()
-        self._id = id,
+        self._id = str(uuid.uuid4()) if id is None else id,
         self.name = name
         self.url = url
         self.method = method
@@ -45,7 +48,7 @@ class Request(GObject.GObject):
         }
 
 
-class RequestGroup(GObject.GObject):
+class RequestGroup(RequestItem):
     __gtype_name__ = "RequestGroup"
 
     def __init__(self, name, children_list=[]):

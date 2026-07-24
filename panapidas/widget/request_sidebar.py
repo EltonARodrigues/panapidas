@@ -18,14 +18,11 @@ class RequestSidebar(Adw.NavigationPage):
 
     request_view = Gtk.Template.Child()
 
-    def __init__(self, groups: RequestGroup):
+    def __init__(self, store: Gio.ListStore):
         super().__init__()
 
-        root_store = Gio.ListStore.new(RequestGroup)
-        root_store.append(groups)
-
         tree_model = Gtk.TreeListModel.new(
-            root_store, False, True, RequestSidebar.create_model_func
+            store, False, True, RequestSidebar.create_model_func
         )
 
         self.selection = Gtk.SingleSelection.new(tree_model)
@@ -41,7 +38,7 @@ class RequestSidebar(Adw.NavigationPage):
             return None
 
         store = Gio.ListStore.new(GObject.GObject)
-
+        print(item_type)
         if item_type == "RequestGroup":
             for child in item.children:
                 child_type = GObject.type_name(item.__gtype__)
