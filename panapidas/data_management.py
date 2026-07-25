@@ -3,9 +3,9 @@ import os
 import json
 
 import gi
-from gi.repository import GLib
+from gi.repository import GLib, GObject, Gio
 
-from panapidas.model.requests import RequestGroup
+from panapidas.model.requests import RequestGroup, RequestItem, Request
 
 APPLICATION_NAME = "panapidas"
 APPLICATION_DATA_FILENAME = "requests.json"
@@ -36,7 +36,7 @@ class DataManagement():
         print(f"Dados salvos com sucesso em: {self.data_path}")
 
     @staticmethod
-    def add_item(item, id: str, new_item):
+    def add_item(item: RequestItem, id: str, new_item: RequestItem):
         if isinstance(item, RequestGroup):
             if item.id == id:
                 item.children.append(new_item)
@@ -52,4 +52,25 @@ class DataManagement():
                     return True
 
         return False
+
+    @staticmethod
+    def remove_by_id(store: Gio.ListStore, id: str):
+        for index in range(store.get_n_items()):
+            item = store[index]
+
+            if item.id == id:
+                finded, position = store.find(item)
+                if finded:
+                    store.remove(position)
+                    return True
+                return False
+
+            item_type = GObject.type_name(item.__gtype__)
+            if item_type == "Request":
+                continue
+
+            encontrado = DataManagement.remove_by_id(item.children, id)
+            if encontrado:
+                return encontrado
+        return None
 

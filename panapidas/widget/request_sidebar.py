@@ -83,7 +83,7 @@ class RequestSidebar(Adw.NavigationPage):
 
         section = Gio.Menu()
         rename = Gio.MenuItem.new("Rename")
-        rename.set_action_and_target_value("app.delete-item", GLib.Variant.new_string(item.id))
+        rename.set_action_and_target_value("app.rename-item", GLib.Variant.new_string(item.id))
         section.append_item(rename)
 
         delete = Gio.MenuItem.new("Delete")
@@ -95,6 +95,10 @@ class RequestSidebar(Adw.NavigationPage):
 
     def on_selected(self, selection: Gtk.SingleSelection, _):
         selected = selection.get_selected_item()
+
+        if not selected:
+            return None
+
         item = selected.get_item()
         item_type = GObject.type_name(item.__gtype__)
 

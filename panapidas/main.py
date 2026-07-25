@@ -49,6 +49,8 @@ class PalapidasApplication(Adw.Application):
         self.dataManagement = DataManagement()
         self.request_group = self.dataManagement.load()
 
+        self.cache_por_id = {}
+
         self.request_group_store = Gio.ListStore.new(RequestItem)
         self.request_group_store.splice(0,0,additions=self.request_group.children)
         self.group_list_model = Gtk.TreeListModel.new(self.request_group_store, False, True, self.create_child_model)
@@ -60,6 +62,7 @@ class PalapidasApplication(Adw.Application):
         self.create_action("create_request", self.on_create)
         self.create_action("create-sub-folder", self.on_create, GLib.VariantType.new("s"))
         self.create_action("create-sub-request", self.on_create, GLib.VariantType.new("s"))
+        self.create_action("delete-item", self.on_create, GLib.VariantType.new("s"))
 
     def create_child_model(self, item):
         item_type = GObject.type_name(item.__gtype__)
@@ -110,6 +113,10 @@ class PalapidasApplication(Adw.Application):
                 id= parent_item_id,
                 new_item= RequestGroup(name = "New Folder")
             )
+
+        if action_name == "delete-item":
+            parent_item_id = target.unpack()
+            DataManagement.remove_by_id(self.request_group_store, parent_item_id)
 
         if action_name == "create-sub-request":
             parent_item_id = target.unpack()
