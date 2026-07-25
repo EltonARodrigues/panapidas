@@ -110,6 +110,14 @@ class PalapidasApplication(Adw.Application):
                 id= parent_item_id,
                 new_item= RequestGroup(name = "New Folder")
             )
+
+        if action_name == "create-sub-request":
+            parent_item_id = target.unpack()
+            DataManagement.add_item(
+                item= self.request_group_store[0],
+                id= parent_item_id,
+                new_item= Request(name = "New Request")
+            )
             print(self.request_group)
 
 
