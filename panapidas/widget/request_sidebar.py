@@ -4,7 +4,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gio, Adw, GObject, Gdk, GLib
 
-from panapidas.model.requests import Request, RequestGroup
+from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.widget.item_popover import ItemPopover
 
 RIGHT_MOUSE_BUTTON = 3
@@ -53,36 +53,41 @@ class RequestSidebar(Adw.NavigationPage):
         item = tree_row.get_item()
 
         gesture.set_button(RIGHT_MOUSE_BUTTON)
-        gesture.connect("pressed", self.on_cell_right_click, expander, item.id)
+        gesture.connect("pressed", self.on_cell_right_click, expander, item)
         expander.add_controller(gesture)
 
         label.set_text(item.name)
 
-    def on_cell_right_click(self, gesture, n_press, x, y, expander, request_item_id):
-        self.create_menu_model(request_item_id)
+    def on_cell_right_click(self, gesture, n_press, x, y, expander, item: RequestItem):
+        self.create_menu_model(item)
 
         self.popover.unparent()
         self.popover.set_parent(expander)
         self.popover.show()
 
-    def create_menu_model(self, request_item_id):
+    def create_menu_model(self, item: RequestItem):
         menu = Gio.Menu()
+
+        item_type = GObject.type_name(item.__gtype__)
+        if item_type == "RequestGroup":
+            new_item_section = Gio.Menu()
+            new_folder = Gio.MenuItem.new("New Folder")
+            new_folder.set_action_and_target_value("app.create-sub-folder", GLib.Variant.new_string(item.id))
+            new_item_section.append_item(new_folder)
+
+            new_request = Gio.MenuItem.new("New Request")
+            new_request.set_action_and_target_value("app.create-sub-request", GLib.Variant.new_string(item.id))
+            new_item_section.append_item(new_request)
+
+            menu.append_section(None, new_item_section)
+
         section = Gio.Menu()
-
-        new_folder = Gio.MenuItem.new("New Folder")
-        new_folder.set_action_and_target_value("app.create-sub-folder", GLib.Variant.new_string(request_item_id))
-        section.append_item(new_folder)
-
-        new_request = Gio.MenuItem.new("New Request")
-        new_request.set_action_and_target_value("app.create-sub-request", GLib.Variant.new_string(request_item_id))
-        section.append_item(new_request)
-
         rename = Gio.MenuItem.new("Rename")
-        rename.set_action_and_target_value("app.delete-item", GLib.Variant.new_string(request_item_id))
+        rename.set_action_and_target_value("app.delete-item", GLib.Variant.new_string(item.id))
         section.append_item(rename)
 
         delete = Gio.MenuItem.new("Delete")
-        delete.set_action_and_target_value("app.delete-item", GLib.Variant.new_string(request_item_id))
+        delete.set_action_and_target_value("app.delete-item", GLib.Variant.new_string(item.id))
         section.append_item(delete)
 
         menu.append_section(None, section)
