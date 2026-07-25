@@ -43,13 +43,13 @@ class PalapidasWindow(Adw.ApplicationWindow):
     request_navigation = Gtk.Template.Child()
     save_request_button = Gtk.Template.Child()
 
-    def __init__(self, request_group: RequestGroup = None, **kwargs):
+    def __init__(self, group_list_model: Gtk.TreeListModel, **kwargs):
         super().__init__(**kwargs)
 
         self.request_pages = {}
         self.save_request_button.set_visible(False)
 
-        sidebar = RequestSidebar(request_group)
+        sidebar = RequestSidebar(group_list_model)
         self.split_view.set_sidebar(sidebar)
         sidebar.connect("request-selected", self.on_request_selected)
 
@@ -64,4 +64,5 @@ class PalapidasWindow(Adw.ApplicationWindow):
     @Gtk.Template.Callback()
     def on_request_save(self, _):
         self.emit("save-requests")
+
 

@@ -27,7 +27,7 @@ from gettext import gettext as _
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Gtk, Gio, Adw, GLib
+from gi.repository import Gtk, Gio, Adw, GLib, GObject
 
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.data_management import DataManagement
@@ -48,9 +48,10 @@ class PalapidasApplication(Adw.Application):
         )
         self.dataManagement = DataManagement()
         self.request_group = self.dataManagement.load()
+
         self.request_group_store = Gio.ListStore.new(RequestItem)
         self.request_group_store.splice(0,0,additions=self.request_group.children)
-
+        self.group_list_model = Gtk.TreeListModel.new(self.request_group_store, False, True, self.create_child_model)
 
         self.create_action("quit", lambda *_: self.quit(), None, ["<control>q"])
         self.create_action("about", self.on_about_action)
@@ -59,6 +60,11 @@ class PalapidasApplication(Adw.Application):
         self.create_action("create_request", self.on_create)
         self.create_action("create-sub-folder", self.on_create, GLib.VariantType.new("s"))
         self.create_action("create-sub-request", self.on_create, GLib.VariantType.new("s"))
+
+    def create_child_model(self, item):
+        item_type = GObject.type_name(item.__gtype__)
+        if item_type == "RequestGroup":
+            return item.children
 
     def on_save_request(self, _):
         self.dataManagement.save(self.request_group)
@@ -72,7 +78,7 @@ class PalapidasApplication(Adw.Application):
 
         win = self.props.active_window
         if not win:
-            win = PalapidasWindow(application=self, request_group=self.request_group_store)
+            win = PalapidasWindow(application=self, group_list_model=self.group_list_model)
             win.connect("save-requests", self.on_save_request)
         win.present()
 
@@ -94,8 +100,19 @@ class PalapidasApplication(Adw.Application):
         """Callback for the app.preferences action."""
         print("app.preferences action activated")
 
-    def on_create(self, action: Gio.SimpleAction, _):
+    def on_create(self, action: Gio.SimpleAction, target):
         action_name = action.get_name()
+
+        if action_name == "create-sub-folder":
+            parent_item_id = target.unpack()
+            DataManagement.add_item(
+                item= self.request_group_store[0],
+                id= parent_item_id,
+                new_item= RequestGroup(name = "New Folder")
+            )
+            print(self.request_group)
+
+
         if action_name == "create_folder":
             new_group = RequestGroup(name= "New Group")
             self.request_group.children.append(new_group)

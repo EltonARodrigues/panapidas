@@ -35,3 +35,21 @@ class DataManagement():
 
         print(f"Dados salvos com sucesso em: {self.data_path}")
 
+    @staticmethod
+    def add_item(item, id: str, new_item):
+        if isinstance(item, RequestGroup):
+            if item.id == id:
+                item.children.append(new_item)
+                return True
+
+            for valor in item.children:
+                if DataManagement.add_item(valor, id, new_item):
+                    return True
+
+        elif isinstance(item, list):
+            for child in item:
+                if DataManagement.add_item(child, id, new_item):
+                    return True
+
+        return False
+

@@ -2,7 +2,7 @@ import uuid
 
 import gi
 gi.require_version("Gtk", "4.0")
-from gi.repository import GObject
+from gi.repository import GObject, Gio
 
 from panapidas.model.map_entry import MapEntry
 
@@ -71,15 +71,15 @@ class RequestGroup(RequestItem):
 
     @staticmethod
     def _children_builder(children_list=[]):
-        children_object = []
+        children_store = Gio.ListStore.new(RequestItem)
         for children in children_list:
             if "children" in children:
-                children_object.append(
+                children_store.append(
                     RequestGroup(id=children["id"], name=children["name"], children_list=children["children"])
                 )
                 continue
 
-            children_object.append(
+            children_store.append(
                 Request(
                     id=children["id"],
                     name=children["name"],
@@ -91,7 +91,7 @@ class RequestGroup(RequestItem):
                 )
             )
 
-        return children_object
+        return children_store
 
     def to_dict(self):
         return {

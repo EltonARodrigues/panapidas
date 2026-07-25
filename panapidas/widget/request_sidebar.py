@@ -21,35 +21,14 @@ class RequestSidebar(Adw.NavigationPage):
 
     request_view = Gtk.Template.Child()
 
-    def __init__(self, store: Gio.ListStore):
+    def __init__(self, group_list_model: Gtk.TreeListModel):
         super().__init__()
-
-        self.store = store
-        tree_model = Gtk.TreeListModel.new(
-            store, False, True, RequestSidebar.create_model_func
-        )
 
         self.popover = ItemPopover()
 
-        self.selection = Gtk.SingleSelection.new(tree_model)
+        self.selection = Gtk.SingleSelection.new(group_list_model)
         self.selection.connect("notify::selected", self.on_selected)
         self.request_view.set_model(self.selection)
-
-    @staticmethod
-    def create_model_func(item):
-        """Retorna um ListStore com os filhos ou None."""
-        item_type = GObject.type_name(item.__gtype__)
-
-        if not item or item_type == "Request":
-            return None
-
-        store = Gio.ListStore.new(GObject.GObject)
-
-        if item_type == "RequestGroup":
-            for child in item.children:
-                child_type = GObject.type_name(item.__gtype__)
-                store.append(child)
-        return store
 
     @Gtk.Template.Callback()
     def setup_factory(self, factory, list_item):
@@ -72,7 +51,7 @@ class RequestSidebar(Adw.NavigationPage):
         gesture = Gtk.GestureClick()
 
         item = tree_row.get_item()
-        print(item)
+
         gesture.set_button(RIGHT_MOUSE_BUTTON)
         gesture.connect("pressed", self.on_cell_right_click, expander, item.id)
         expander.add_controller(gesture)
