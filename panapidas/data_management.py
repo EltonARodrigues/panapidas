@@ -16,6 +16,7 @@ class DataManagement():
         self.data_dir = GLib.get_user_data_dir()
         self.app_dir = os.path.join(self.data_dir, APPLICATION_NAME)
         self.data_path = os.path.join(self.app_dir, APPLICATION_DATA_FILENAME)
+        self._request_group = None
 
     def load(self) -> RequestGroup:
         if not os.path.exists(self.data_path):
@@ -25,33 +26,44 @@ class DataManagement():
         with open(self.data_path, "r", encoding="utf-8") as f:
             requests_dict = json.load(f)
 
-        return RequestGroup(requests_dict["id"], requests_dict["name"], requests_dict["children"])
+        self._request_group =  RequestGroup(requests_dict["id"], requests_dict["name"], requests_dict["children"])
+        return self._request_group
 
-    def save(self, requestGroup: RequestGroup):
+    def save(self, store: Gio.ListStore):
         os.makedirs(self.app_dir, exist_ok=True)
 
+        self._request_group.children = []
+        for i in range(store.get_n_items()):
+            objeto = store.get_item(i)
+            self._request_group.children.append(objeto)
+
         with open(self.data_path, 'w', encoding='utf-8') as f:
-            json.dump(requestGroup.to_dict(), f, indent=2, ensure_ascii=False)
+            json.dump(self._request_group.to_dict(), f, indent=2, ensure_ascii=False)
 
         print(f"Dados salvos com sucesso em: {self.data_path}")
 
     @staticmethod
-    def add_item(item: RequestItem, id: str, new_item: RequestItem):
+    def add_item_to_object(item: [RequestItem], id: str, new_item: RequestItem):
         if isinstance(item, RequestGroup):
             if item.id == id:
                 item.children.append(new_item)
                 return True
 
             for valor in item.children:
-                if DataManagement.add_item(valor, id, new_item):
+                if DataManagement.add_item_to_object(valor, id, new_item):
                     return True
 
         elif isinstance(item, list):
             for child in item:
-                if DataManagement.add_item(child, id, new_item):
+                if DataManagement.add_item_to_object(child, id, new_item):
                     return True
 
         return False
+
+    @staticmethod
+    def add_item(item_list: list[RequestItem], id: str, new_item: RequestItem):
+        for item in item_list:
+            DataManagement.add_item_to_object(item, id, new_item)
 
     @staticmethod
     def remove_by_id(store: Gio.ListStore, id: str):

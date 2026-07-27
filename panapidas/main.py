@@ -47,12 +47,12 @@ class PalapidasApplication(Adw.Application):
             resource_base_path="/eltonarodrigues/org/codeberg/panapidas",
         )
         self.dataManagement = DataManagement()
-        self.request_group = self.dataManagement.load()
+        request_group = self.dataManagement.load()
 
         self.cache_por_id = {}
 
         self.request_group_store = Gio.ListStore.new(RequestItem)
-        self.request_group_store.splice(0,0,additions=self.request_group.children)
+        self.request_group_store.splice(0,0,additions=request_group.children)
         self.group_list_model = Gtk.TreeListModel.new(self.request_group_store, False, True, self.create_child_model)
 
         self.create_action("quit", lambda *_: self.quit(), None, ["<control>q"])
@@ -70,7 +70,7 @@ class PalapidasApplication(Adw.Application):
             return item.children
 
     def on_save_request(self, _):
-        self.dataManagement.save(self.request_group)
+        self.dataManagement.save(self.request_group_store)
 
     def do_activate(self):
         """Called when the application is activated.
@@ -109,36 +109,32 @@ class PalapidasApplication(Adw.Application):
         if action_name == "create-sub-folder":
             parent_item_id = target.unpack()
             DataManagement.add_item(
-                item= self.request_group_store[0],
+                item_list= self.request_group_store,
                 id= parent_item_id,
                 new_item= RequestGroup(name = "New Folder")
+            )
+
+        if action_name == "create-sub-request":
+            parent_item_id = target.unpack()
+            DataManagement.add_item(
+                item_list= self.request_group_store,
+                id= parent_item_id,
+                new_item= Request(name = "New Request")
             )
 
         if action_name == "delete-item":
             parent_item_id = target.unpack()
             DataManagement.remove_by_id(self.request_group_store, parent_item_id)
 
-        if action_name == "create-sub-request":
-            parent_item_id = target.unpack()
-            DataManagement.add_item(
-                item= self.request_group_store[0],
-                id= parent_item_id,
-                new_item= Request(name = "New Request")
-            )
-            print(self.request_group)
-
-
         if action_name == "create_folder":
             new_group = RequestGroup(name= "New Group")
-            self.request_group.children.append(new_group)
             self.request_group_store.append(new_group)
 
         if action_name == "create_request":
             new_request = Request(name= "New Request")
-            self.request_group.children.append(new_request)
             self.request_group_store.append(new_request)
 
-        self.dataManagement.save(self.request_group)
+        self.dataManagement.save(self.request_group_store)
 
     def create_action(self, name, callback, target=None, shortcuts=None):
         """Add an application action.
