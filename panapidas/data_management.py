@@ -66,43 +66,34 @@ class DataManagement():
             DataManagement.add_item_to_object(item, id, new_item)
 
     @staticmethod
-    def remove_by_id(store: Gio.ListStore, id: str):
+    def find_item_index(store: Gio.ListStore, id: str):
         for index in range(store.get_n_items()):
             item = store[index]
 
             if item.id == id:
                 finded, position = store.find(item)
                 if finded:
-                    store.remove(position)
-                    return True
+                    return finded, position, store
                 return False
 
             item_type = GObject.type_name(item.__gtype__)
             if item_type == "Request":
                 continue
 
-            finded = DataManagement.remove_by_id(item.children, id)
+            finded = DataManagement.find_item_index(item.children, id)
             if finded:
                 return finded
-        return None
+        return False
+
+    @staticmethod
+    def remove_by_id(store: Gio.ListStore, id: str):
+        finded, position, finded_store = DataManagement.find_item_index(store, id)
+        if finded:
+            finded_store.remove(position)
 
     @staticmethod
     def rename_item(store: Gio.ListStore, id: str, new_name: str):
-        for index in range(store.get_n_items()):
-            item = store[index]
+        finded, position, finded_store = DataManagement.find_item_index(store, id)
+        if finded:
+            finded_store[position].name = new_name
 
-            if item.id == id:
-                finded, position = store.find(item)
-                if finded:
-                    store[position].name = new_name
-                    return True
-                return False
-
-            item_type = GObject.type_name(item.__gtype__)
-            if item_type == "Request":
-                continue
-
-            finded = DataManagement.rename_item(item.children, id, new_name)
-            if finded:
-                return finded
-        return None
