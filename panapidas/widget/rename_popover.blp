@@ -1,0 +1,41 @@
+using Gtk 4.0;
+
+template $RenamePopover: Popover {
+  has-arrow: true;
+  autohide: true;
+  position: bottom;
+
+  child: Box {
+    margin-top: 12;
+    margin-bottom: 12;
+    margin-start: 12;
+    margin-end: 12;
+    orientation: vertical;
+    spacing: 6;
+
+    Label {
+      label: _("Filename");
+      xalign: 0;
+      // attributes:
+      //   weight: "bold"
+    }
+
+    Box {
+      spacing: 6;
+
+      Entry rename_entry {
+        changed => $on_rename_change();
+      }
+
+      Button save_new_name {
+        sensitive: true;
+        label: _("Rename");
+        use-underline: true;
+
+        styles [
+          "destructive-action",
+        ]
+      }
+    }
+  };
+}

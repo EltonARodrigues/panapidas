@@ -86,3 +86,20 @@ class DataManagement():
                 return encontrado
         return None
 
+    @staticmethod
+    def rename_item(store: Gio.ListStore, id: str, new_name: str):
+        for index in range(store.get_n_items()):
+            item = store[index]
+
+            if item.id == id:
+                finded, position = store.find(item)
+                if finded:
+                    print(store[position].name)
+                    store[position].name = new_name
+                    return True
+                return False
+
+            encontrado = DataManagement.rename_item(item.children, id, new_name)
+            if encontrado:
+                return encontrado
+        return None

@@ -6,6 +6,7 @@ from gi.repository import Gtk, Gio, Adw, GObject, Gdk, GLib
 
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.widget.item_popover import ItemPopover
+from panapidas.widget.rename_popover import RenamePopover
 
 RIGHT_MOUSE_BUTTON = 3
 
@@ -17,6 +18,7 @@ class RequestSidebar(Adw.NavigationPage):
 
     __gsignals__ = {
         'request-selected': (GObject.SignalFlags.RUN_FIRST, None, (Request,)),
+        'save-requests': (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     request_view = Gtk.Template.Child()
@@ -24,7 +26,20 @@ class RequestSidebar(Adw.NavigationPage):
     def __init__(self, group_list_model: Gtk.TreeListModel):
         super().__init__()
 
+        self.action_group = Gio.SimpleActionGroup()
+        self.insert_action_group("sidebar", self.action_group)
+
+        rename_action = Gio.SimpleAction.new(
+            "rename-item",
+            GLib.VariantType.new("s"),
+        )
+        rename_action.connect("activate", self.on_rename)
+        self.action_group.add_action(rename_action)
+
         self.popover = ItemPopover()
+        self.rename_popover = RenamePopover()
+
+        self.target_item = None
 
         self.selection = Gtk.SingleSelection.new(group_list_model)
         self.selection.connect("notify::selected", self.on_selected)
@@ -59,39 +74,18 @@ class RequestSidebar(Adw.NavigationPage):
         label.set_text(item.name)
 
     def on_cell_right_click(self, gesture, n_press, x, y, expander, item: RequestItem):
-        self.create_menu_model(item)
-
+        self.target_item = item
+        self.actual_popover_position = expander
+        self.popover.create_menu_model(item)
         self.popover.unparent()
-        self.popover.set_parent(expander)
+        self.popover.set_parent(self.actual_popover_position)
         self.popover.show()
 
-    def create_menu_model(self, item: RequestItem):
-        menu = Gio.Menu()
-
-        item_type = GObject.type_name(item.__gtype__)
-        if item_type == "RequestGroup":
-            new_item_section = Gio.Menu()
-            new_folder = Gio.MenuItem.new("New Folder")
-            new_folder.set_action_and_target_value("app.create-sub-folder", GLib.Variant.new_string(item.id))
-            new_item_section.append_item(new_folder)
-
-            new_request = Gio.MenuItem.new("New Request")
-            new_request.set_action_and_target_value("app.create-sub-request", GLib.Variant.new_string(item.id))
-            new_item_section.append_item(new_request)
-
-            menu.append_section(None, new_item_section)
-
-        section = Gio.Menu()
-        rename = Gio.MenuItem.new("Rename")
-        rename.set_action_and_target_value("app.rename-item", GLib.Variant.new_string(item.id))
-        section.append_item(rename)
-
-        delete = Gio.MenuItem.new("Delete")
-        delete.set_action_and_target_value("app.delete-item", GLib.Variant.new_string(item.id))
-        section.append_item(delete)
-
-        menu.append_section(None, section)
-        self.popover.set_menu_model(menu)
+    def on_rename(self, widget, target):
+         self.rename_popover.unparent()
+         self.rename_popover.set_rename_item(self.target_item)
+         self.rename_popover.set_parent(self.actual_popover_position)
+         self.rename_popover.show()
 
     def on_selected(self, selection: Gtk.SingleSelection, _):
         selected = selection.get_selected_item()

@@ -8,7 +8,8 @@ blueprints = custom_target('blueprints',
     'shortcuts-dialog.blp',
     'page/request_page.blp',
     'widget/request_sidebar.blp',
-    'widget/item_popover.blp'
+    'widget/item_popover.blp',
+    'widget/rename_popover.blp'
   ),
   output: '.',
   command: [

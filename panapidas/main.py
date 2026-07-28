@@ -63,6 +63,7 @@ class PalapidasApplication(Adw.Application):
         self.create_action("create-sub-folder", self.on_create, GLib.VariantType.new("s"))
         self.create_action("create-sub-request", self.on_create, GLib.VariantType.new("s"))
         self.create_action("delete-item", self.on_create, GLib.VariantType.new("s"))
+        self.create_action("rename-item", self.on_create, GLib.VariantType.new_tuple([GLib.VariantType('s'), GLib.VariantType('s')]))
 
     def create_child_model(self, item):
         item_type = GObject.type_name(item.__gtype__)
@@ -133,6 +134,14 @@ class PalapidasApplication(Adw.Application):
         if action_name == "create_request":
             new_request = Request(name= "New Request")
             self.request_group_store.append(new_request)
+
+        if action_name == "rename-item":
+            parent_item_id, new_name = target
+            DataManagement.rename_item(
+                store=self.request_group_store,
+                id=parent_item_id,
+                new_name=new_name
+            )
 
         self.dataManagement.save(self.request_group_store)
 
