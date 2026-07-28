@@ -49,6 +49,8 @@ class PalapidasWindow(Adw.ApplicationWindow):
         self.request_pages = {}
         self.save_request_button.set_visible(False)
 
+        group_list_model.connect("items-changed", self.on_list_model_change)
+
         sidebar = RequestSidebar(group_list_model)
         self.split_view.set_sidebar(sidebar)
         sidebar.connect("request-selected", self.on_request_selected)
@@ -65,4 +67,15 @@ class PalapidasWindow(Adw.ApplicationWindow):
     def on_request_save(self, _):
         self.emit("save-requests")
 
+    def on_list_model_change(self, list_model: Gtk.TreeListModel, position: int,removed: int, added: int ):
+        if removed > 0:
+            actual_ids = [item.get_item().id for item in list_model]
+
+            pages_ids = self.request_pages.keys()
+            removed_ids = list(set(pages_ids).difference(actual_ids))
+
+            for k in removed_ids:
+                self.request_pages.pop(k, None)
+
+            self.content_request.set_content(None)
 
