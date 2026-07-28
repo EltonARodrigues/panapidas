@@ -19,6 +19,12 @@ class RenamePopover(Gtk.Popover):
 
         self.set_position(Gtk.PositionType.RIGHT)
         self.save_new_name.set_action_name('app.rename-item')
+        self.save_new_name.set_action_target_value(
+            GLib.Variant.new_tuple(
+                GLib.Variant('s', ''),
+                GLib.Variant('s', '')
+            )
+        )
 
     def set_rename_item(self, item: RequestItem):
         self.item = item
