@@ -10,6 +10,28 @@ from panapidas.model.map_entry import MapEntry
 class RequestItem(GObject.GObject):
     __gtype_name__ = "RequestItem"
 
+    def __init__(self, name_atr: str = None):
+        super().__init__()
+        self._name = name_atr
+        self._changed_handler = None
+
+    @GObject.Property(type=str)
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @GObject.Property(type=str)
+    def changed_handler(self):
+        return self._changed_handler
+
+    @changed_handler.setter
+    def changed_handler(self, value):
+        self._changed_handler = value
+
+
 class Request(RequestItem):
     __gtype_name__ = "Request"
 
@@ -23,9 +45,9 @@ class Request(RequestItem):
         body = None,
         params: MapEntry = [],
     ):
-        super().__init__()
+        super().__init__(name_atr=name)
         self._id = str(uuid.uuid4()) if id is None else id,
-        self.name = name
+        # self.name = name
         self.url = url
         self.method = method
         self.headers = headers
@@ -53,9 +75,9 @@ class RequestGroup(RequestItem):
 
     def __init__(self, id= None, name=None, children_list=[]):
 
-        super().__init__()
+        super().__init__(name_atr = name)
         self.id = str(uuid.uuid4()) if id is None else id
-        self.name = name
+        # self.name = name
         self.children = RequestGroup._children_builder(children_list)
 
     @staticmethod

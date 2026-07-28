@@ -66,6 +66,7 @@ class PalapidasApplication(Adw.Application):
         self.create_action("rename-item", self.on_create, GLib.VariantType.new_tuple([GLib.VariantType('s'), GLib.VariantType('s')]))
 
     def create_child_model(self, item):
+        print("create_child_model")
         item_type = GObject.type_name(item.__gtype__)
         if item_type == "RequestGroup":
             return item.children

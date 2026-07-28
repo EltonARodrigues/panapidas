@@ -81,9 +81,9 @@ class DataManagement():
             if item_type == "Request":
                 continue
 
-            encontrado = DataManagement.remove_by_id(item.children, id)
-            if encontrado:
-                return encontrado
+            finded = DataManagement.remove_by_id(item.children, id)
+            if finded:
+                return finded
         return None
 
     @staticmethod
@@ -94,12 +94,15 @@ class DataManagement():
             if item.id == id:
                 finded, position = store.find(item)
                 if finded:
-                    print(store[position].name)
                     store[position].name = new_name
                     return True
                 return False
 
-            encontrado = DataManagement.rename_item(item.children, id, new_name)
-            if encontrado:
-                return encontrado
+            item_type = GObject.type_name(item.__gtype__)
+            if item_type == "Request":
+                continue
+
+            finded = DataManagement.rename_item(item.children, id, new_name)
+            if finded:
+                return finded
         return None

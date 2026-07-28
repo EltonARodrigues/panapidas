@@ -25,6 +25,7 @@ template $RequestSidebar: Adw.NavigationPage {
         factory: SignalListItemFactory factory {
           setup => $setup_factory();
           bind => $bind_factory();
+          unbind => $unbind_factory();
         };
       };
     };

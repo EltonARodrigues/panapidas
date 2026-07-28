@@ -56,7 +56,7 @@ class RequestSidebar(Adw.NavigationPage):
         list_item.set_child(expander)
 
     @Gtk.Template.Callback()
-    def bind_factory(self, factory, list_item):
+    def bind_factory(self, factory, list_item: Gtk.ListItem):
         expander = list_item.get_child()
         label = expander.get_child()
 
@@ -71,7 +71,27 @@ class RequestSidebar(Adw.NavigationPage):
         gesture.connect("pressed", self.on_cell_right_click, expander, item)
         expander.add_controller(gesture)
 
+        list_item.changed_handler = item.connect('notify::name', self._on_item_changed, label)
         label.set_text(item.name)
+
+    @Gtk.Template.Callback()
+    def unbind_factory(self, factory, list_item: Gtk.ListItem):
+        tree_row = list_item.get_item()
+
+        if tree_row is None:
+            return
+
+        item = tree_row.get_item()
+        changed_handler = item.changed_handler
+        handler = getattr(list_item, 'changed_handler', None)
+
+        if handler and item:
+            item.disconnect(handler)
+            list_item.changed_handler = None
+
+    def _on_item_changed(self, item, pspec, label):
+        label.set_text(item.name)
+
 
     def on_cell_right_click(self, gesture, n_press, x, y, expander, item: RequestItem):
         self.target_item = item
