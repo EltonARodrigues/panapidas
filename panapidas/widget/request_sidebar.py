@@ -45,6 +45,8 @@ class RequestSidebar(Adw.NavigationPage):
         self.selection.connect("notify::selected", self.on_selected)
         self.request_view.set_model(self.selection)
 
+        self.selected = None
+
     @Gtk.Template.Callback()
     def setup_factory(self, factory, list_item):
         label = Gtk.Label()
@@ -90,6 +92,7 @@ class RequestSidebar(Adw.NavigationPage):
             list_item.changed_handler = None
 
     def _on_item_changed(self, item, pspec, label):
+        self.on_selected(self.selection, None)
         label.set_text(item.name)
 
 
@@ -108,12 +111,12 @@ class RequestSidebar(Adw.NavigationPage):
          self.rename_popover.show()
 
     def on_selected(self, selection: Gtk.SingleSelection, _):
-        selected = selection.get_selected_item()
+        self.selected = selection.get_selected_item()
 
-        if not selected:
+        if not self.selected:
             return None
 
-        item = selected.get_item()
+        item = self.selected.get_item()
         item_type = GObject.type_name(item.__gtype__)
 
         if item_type == "RequestGroup":
