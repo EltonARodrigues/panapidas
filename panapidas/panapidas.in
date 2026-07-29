@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     from gi.repository import Gio
     resource = Gio.Resource.load(os.path.join(pkgdatadir, 'panapidas.gresource'))
-    resource._register()
+    Gio.resources_register(resource)
 
     from panapidas import main
     sys.exit(main.main(VERSION))

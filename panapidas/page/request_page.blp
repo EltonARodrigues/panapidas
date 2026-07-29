@@ -5,9 +5,6 @@ using GtkSource 5;
 template $RequestPage: Adw.Bin {
   child: Box {
     orientation: vertical;
-    margin-start: 5;
-    margin-end: 5;
-    margin-top: 5;
     halign: fill;
 
     Box {
@@ -61,7 +58,10 @@ template $RequestPage: Adw.Bin {
 
       Box {
         orientation: vertical;
-        spacing: 5;
+
+        styles [
+          "stack_box_request",
+        ]
 
         Gtk.StackSwitcher {
           stack: stack;
@@ -89,10 +89,6 @@ template $RequestPage: Adw.Bin {
 
                 Gtk.ListBox request_params_list {
                   selection-mode: none;
-
-                  styles [
-                    "boxed-list",
-                  ]
                 }
               }
             };
@@ -114,10 +110,6 @@ template $RequestPage: Adw.Bin {
 
                 Gtk.ListBox request_header_list {
                   selection-mode: none;
-
-                  styles [
-                    "boxed-list",
-                  ]
                 }
               }
             };
@@ -128,14 +120,14 @@ template $RequestPage: Adw.Bin {
             title: _("Body");
 
             child: Box body_type_widget {
-              spacing: 5;
               orientation: vertical;
-              // height-request: 200;
+
               Adw.ToggleGroup {
                 active-name: "none";
 
                 styles [
                   "toolbar",
+                  "body_toggle",
                 ]
 
                 notify::active-name => $on_body_type_change();
@@ -162,7 +154,7 @@ template $RequestPage: Adw.Bin {
               }
 
               ScrolledWindow body_type_request {
-                max-content-height: 200;
+                max-content-height: 400;
                 hscrollbar-policy: never;
                 propagate-natural-height: true;
                 has-frame: false;
@@ -170,6 +162,27 @@ template $RequestPage: Adw.Bin {
               }
             };
           }
+        }
+      }
+
+      Box {
+        height-request: 35;
+        spacing: 5;
+
+        styles [
+          "response_status_bar",
+        ]
+
+        Label {
+          label: _("Status: 200 OK");
+        }
+
+        Label {
+          label: _("Time: 20 ms");
+        }
+
+        Label {
+          label: _("Size: 20 B");
         }
       }
 

@@ -1,0 +1,32 @@
+.response_status_bar {
+  min-height: 24px;
+  font-size: 0.9em;
+  padding-top: 1px;
+  background: var(--headerbar-bg-color);
+  color: var(--headerbar-fg-color);
+}
+
+.response_status_bar > * {
+  border-right: 1px solid var(--border-color);
+  padding-left: 9px;
+  padding-right: 9px;
+}
+
+.response_status_bar > *:last-child {
+  border-right: none;
+}
+
+
+.response_status_bar > label {
+  font-weight: normal;
+}
+
+.stack_box_request stackswitcher {
+    background: var(--headerbar-bg-color);
+    padding: 5px;
+}
+
+.body_toggle, list {
+    border-radius: 0;
+    background: var(--headerbar-bg-color);
+}

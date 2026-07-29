@@ -28,7 +28,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 gi.require_version("GtkSource", "5")
 
-from gi.repository import Gtk, Gio, Adw, GLib, GObject, GtkSource
+from gi.repository import Gtk, Gio, Adw, GLib, GObject, GtkSource, Gdk
 
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.data_management import DataManagement
@@ -165,9 +165,23 @@ class PalapidasApplication(Adw.Application):
         if shortcuts:
             self.set_accels_for_action(f"app.{name}", shortcuts)
 
+# FIX - remover load_css
+def load_css():
+     css_provider = Gtk.CssProvider()
+     try:
+         css_provider.load_from_resource("/eltonarodrigues/org/codeberg/panapidas/style.css")
+         display = Gdk.Display.get_default()
+         Gtk.StyleContext.add_provider_for_display(
+             display,
+             css_provider,
+             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+         )
+     except Exception as e:
+         print(f"load_css error: {e}")
 
 def main(version):
     """The application's entry point."""
+    load_css()
     app = PalapidasApplication()
     return app.run(sys.argv)
 

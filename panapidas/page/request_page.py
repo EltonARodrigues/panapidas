@@ -52,8 +52,7 @@ class RequestPage(Adw.Bin):
         self.params = MapListMenu(self.request_params_list, request.params)
         self.params.connect("map-changed", self.on_map_change, "params")
 
-        self.body_params_list = Gtk.ListBox()
-        self.body_params_list.set_css_classes(["boxed-list"])
+        self.body_params_list = Gtk.ListBox(selection_mode=0)
 
         body_params_filter = request.body if type(request.body) == "list" else []
         self.body_params = MapListMenu(self.body_params_list, body_params_filter)
@@ -61,6 +60,9 @@ class RequestPage(Adw.Bin):
         body_params_filter = request.body if type(request.body) == "list" else []
 
         self.requestBodySourceView = BodySourceView()
+        self.requestBodySourceView.set_hexpand(True)
+        self.requestBodySourceView.set_halign(Gtk.Align.FILL)
+        self.requestBodySourceView.set_size_request(-1, 500)
 
     @staticmethod
     def get_text_view_value(viewer: Gtk.TextView):
