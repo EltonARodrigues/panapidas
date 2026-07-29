@@ -35,6 +35,7 @@ class RequestPage(Adw.Bin):
     request_header_list = Gtk.Template.Child()
     request_params_list = Gtk.Template.Child()
     body_type_request = Gtk.Template.Child()
+    response_body = Gtk.Template.Child()
 
     def __init__(self, request: Request, **kwargs):
         super().__init__(**kwargs)
@@ -88,8 +89,8 @@ class RequestPage(Adw.Bin):
             error_count=0
         )
 
-        # self.buffer = self.response_body.get_buffer()
-        self.buffer.set_text(response.body)
+        buffer = self.response_body.get_buffer()
+        buffer.set_text(response.body)
 
 
     @Gtk.Template.Callback()
