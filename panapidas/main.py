@@ -26,8 +26,9 @@ from gettext import gettext as _
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
+gi.require_version("GtkSource", "5")
 
-from gi.repository import Gtk, Gio, Adw, GLib, GObject
+from gi.repository import Gtk, Gio, Adw, GLib, GObject, GtkSource
 
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.data_management import DataManagement
@@ -46,6 +47,9 @@ class PalapidasApplication(Adw.Application):
             flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
             resource_base_path="/eltonarodrigues/org/codeberg/panapidas",
         )
+
+        GtkSource.init()
+
         self.dataManagement = DataManagement()
         request_group = self.dataManagement.load()
 
@@ -166,4 +170,5 @@ def main(version):
     """The application's entry point."""
     app = PalapidasApplication()
     return app.run(sys.argv)
+
 

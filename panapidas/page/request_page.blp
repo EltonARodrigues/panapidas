@@ -1,14 +1,15 @@
 using Gtk 4.0;
 using Adw 1;
+using GtkSource 5;
 
 template $RequestPage: Adw.Bin {
-
   child: Box {
     orientation: vertical;
     margin-start: 5;
     margin-end: 5;
     margin-top: 5;
     halign: fill;
+
     Box {
       orientation: horizontal;
       spacing: 5;
@@ -36,6 +37,7 @@ template $RequestPage: Adw.Bin {
 
             selected: 0;
           };
+
           notify => $on_method_change();
         }
 
@@ -129,7 +131,6 @@ template $RequestPage: Adw.Bin {
               spacing: 5;
               orientation: vertical;
               // height-request: 200;
-
               Adw.ToggleGroup {
                 active-name: "none";
 
@@ -158,29 +159,31 @@ template $RequestPage: Adw.Bin {
                   name: "raw";
                   label: _("raw");
                 }
-
               }
-                ScrolledWindow body_type_request {
-                  max-content-height: 200;
-                  hscrollbar-policy: never;
-                  propagate-natural-height: true;
-                  has-frame: false;
-                  valign: start;
 
-                }
+              ScrolledWindow body_type_request {
+                max-content-height: 200;
+                hscrollbar-policy: never;
+                propagate-natural-height: true;
+                has-frame: false;
+                valign: start;
+              }
             };
           }
         }
       }
 
-      Adw.Bin {
-        Gtk.TextView response_body {
-          editable: false;
-          monospace: true;
-          hexpand: true;
-          vexpand: true;
-        }
-      }
+        ScrolledWindow {
+           height-request: 180;
+           width-request: 600;
+           has-frame: false;
+           vexpand: true;
+
+           styles ["textview"]
+
+
+           $BodySourceView {}
+         }
     }
   };
 }

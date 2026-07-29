@@ -9,7 +9,8 @@ blueprints = custom_target('blueprints',
     'page/request_page.blp',
     'widget/request_sidebar.blp',
     'widget/item_popover.blp',
-    'widget/rename_popover.blp'
+    'widget/rename_popover.blp',
+    'widget/body_source_view.blp'
   ),
   output: '.',
   command: [

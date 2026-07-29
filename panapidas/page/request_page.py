@@ -17,10 +17,10 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from gi.repository import Adw
-from gi.repository import Gtk
+from gi.repository import Gtk, Adw
 
 from panapidas.widget.map_list_menu import MapListMenu
+from panapidas.widget.body_source_view import BodySourceView
 from panapidas.model.map_entry import MapEntry
 from panapidas.request.http_request import request
 from panapidas.model.requests import Request
@@ -34,7 +34,6 @@ class RequestPage(Adw.Bin):
     url_entry = Gtk.Template.Child()
     request_header_list = Gtk.Template.Child()
     request_params_list = Gtk.Template.Child()
-    body_type_widget = Gtk.Template.Child()
     body_type_request = Gtk.Template.Child()
 
     def __init__(self, request: Request, **kwargs):
@@ -52,24 +51,12 @@ class RequestPage(Adw.Bin):
         self.params = MapListMenu(self.request_params_list, request.params)
         self.params.connect("map-changed", self.on_map_change, "params")
 
-        self.request_text_body = Gtk.TextView(
-            monospace= True,
-            #hexpand= True,
-            vexpand= True,
-            height_request= 100
-        )
-
-        buffer = self.request_text_body.get_buffer()
-        if type(request.body) == str:
-            buffer.set_text(request.body)
-        buffer.connect("changed", self.on_request_body_change)
-
         self.body_params_list = Gtk.ListBox()
         self.body_params_list.set_css_classes(["boxed-list"])
 
         body_params_filter = request.body if type(request.body) == "list" else []
-        self.body_params = MapListMenu(self.body_params_list, body_params_filter)
 
+        self.requestBodySourceView = BodySourceView()
 
     @staticmethod
     def get_text_view_value(viewer: Gtk.TextView):
@@ -81,15 +68,15 @@ class RequestPage(Adw.Bin):
 
     @Gtk.Template.Callback()
     def on_send(self, widget):
-        print(f"URL: {self.url}")
+        print(f"URL: {self.url_entry.get_text()}")
         print(f"Method: {self.http_method_list.props.selected_item.get_string()}")
 
-        request_body = RequestPage.get_text_view_value(self.response_body)
-        print(f"Body: {request_body}")
+        # request_body = RequestPage.get_text_view_value(self.response_body)
+        # print(f"Body: {request_body}")
         print(self.headers.get_map())
 
         response = request(
-            url=self.url,
+            url=self.url_entry.get_text(),
             data=None,
             params=None,
             headers=self.headers.get_map(),
@@ -98,8 +85,8 @@ class RequestPage(Adw.Bin):
             error_count=0
         )
 
-        buffer = self.response_body.get_buffer()
-        buffer.set_text(response.body)
+        # self.buffer = self.response_body.get_buffer()
+        self.buffer.set_text(response.body)
 
 
     @Gtk.Template.Callback()
@@ -110,7 +97,7 @@ class RequestPage(Adw.Bin):
             self.body_type_request.set_child(None)
 
         if body_type == "raw":
-            self.body_type_request.set_child(self.request_text_body)
+            self.body_type_request.set_child(self.requestBodySourceView)
         if body_type == "form_data" or body_type == "form_urlencoded":
             self.body_type_request.set_child(self.body_params_list)
 
