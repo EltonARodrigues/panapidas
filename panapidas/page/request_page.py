@@ -55,6 +55,9 @@ class RequestPage(Adw.Bin):
         self.body_params_list.set_css_classes(["boxed-list"])
 
         body_params_filter = request.body if type(request.body) == "list" else []
+        self.body_params = MapListMenu(self.body_params_list, body_params_filter)
+
+        body_params_filter = request.body if type(request.body) == "list" else []
 
         self.requestBodySourceView = BodySourceView()
 
