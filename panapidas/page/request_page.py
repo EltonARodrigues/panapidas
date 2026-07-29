@@ -37,7 +37,9 @@ class RequestPage(Adw.Bin):
     body_type_request = Gtk.Template.Child()
     response_body = Gtk.Template.Child()
     default_status_bar_label = Gtk.Template.Child()
-    response_status = Gtk.Template.Child()
+    response_status_label = Gtk.Template.Child()
+    response_time_label = Gtk.Template.Child()
+    response_size_label = Gtk.Template.Child()
 
     def __init__(self, request: Request, **kwargs):
         super().__init__(**kwargs)
@@ -66,51 +68,53 @@ class RequestPage(Adw.Bin):
         self.requestBodySourceView.set_halign(Gtk.Align.FILL)
         self.requestBodySourceView.set_size_request(-1, 500)
 
-    @staticmethod
-    def get_text_view_value(viewer: Gtk.TextView):
-        buffer = viewer.get_buffer()
-        start_iter = buffer.get_start_iter()
-        end_iter = buffer.get_end_iter()
+        self.body_type=None
 
-        return buffer.get_text(start_iter, end_iter, True)
+    @staticmethod
+    def set_response_bar_label(label: Gtk.Label, text: str):
+        label_template_text = label.get_text()
+        label.set_visible(True)
+        label.set_text(label_template_text.format(text))
 
     @Gtk.Template.Callback()
     def on_send(self, widget):
-        print(f"URL: {self.url_entry.get_text()}")
-        print(f"Method: {self.http_method_list.props.selected_item.get_string()}")
-
-        # request_body = RequestPage.get_text_view_value(self.response_body)
-        # print(f"Body: {request_body}")
-        print(self.headers.get_map())
+        buffer = self.requestBodySourceView.get_buffer()
+        body_str = buffer.get_text(
+            buffer.get_start_iter(),
+            buffer.get_end_iter(),
+            False
+        )
 
         response = request(
             url=self.url_entry.get_text(),
-            data=None,
-            params=None,
-            headers=self.headers.get_map(),
+            body=body_str,
+            params=self.body_params.get_dict(),
+            headers=self.headers.get_dict(),
             method=self.http_method_list.props.selected_item.get_string(),
-            data_as_json=True,
-            error_count=0
+            data_as_json= self.body_type == "raw" ,
+            body_type=self.body_type
         )
 
         self.default_status_bar_label.set_visible(False)
-        texto_base = self.response_status.get_text()
-        self.response_status.set_text(texto_base.format(response.status))
-        self.response_status.set_visible(True)
+
+        RequestPage.set_response_bar_label(self.response_status_label, response.status)
+        RequestPage.set_response_bar_label(self.response_time_label, response.time_seconds)
+        RequestPage.set_response_bar_label(self.response_size_label, response.response_size)
+
         buffer = self.response_body.get_buffer()
-        buffer.set_text(response.body)
+        buffer.set_text(response.body, -1)
 
 
     @Gtk.Template.Callback()
     def on_body_type_change(self, widget: Adw.ToggleGroup, active_name: str):
-        body_type = widget.get_property(active_name.get_name())
+        self.body_type = widget.get_property(active_name.get_name())
 
-        if body_type == "none":
+        if self.body_type == "none":
             self.body_type_request.set_child(None)
 
-        if body_type == "raw":
+        if self.body_type == "raw":
             self.body_type_request.set_child(self.requestBodySourceView)
-        if body_type == "form_data" or body_type == "form_urlencoded":
+        if self.body_type in ["form_data", "form_urlencoded"]:
             self.body_type_request.set_child(self.body_params_list)
 
     @Gtk.Template.Callback()

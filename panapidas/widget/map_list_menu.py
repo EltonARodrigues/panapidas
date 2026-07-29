@@ -48,8 +48,9 @@ class MapListMenu(GObject.Object):
     def get_map_entry(self):
         return [row for row in self.list_model if len(row.key) > 0]
 
-    def get_map(self):
-        return [{ row.key: row.value } for row in self.list_model if len(row.key) > 0]
+    def get_dict(self):
+        items_dict = { row.key: row.value for row in self.list_model if len(row.key) > 0}
+        return items_dict if len(items_dict.keys()) > 0 else None
 
     def destroy_row(self, event_name: str, row_id: int):
         row_count = self.list_model.get_n_items()
@@ -121,6 +122,7 @@ class MapListMenu(GObject.Object):
         linked_box.append(close_button)
 
         self.list_box.append(linked_box)
+
 
 
 
