@@ -35,6 +35,7 @@ class RequestPage(Adw.Bin):
     request_header_list = Gtk.Template.Child()
     request_params_list = Gtk.Template.Child()
     body_type_widget = Gtk.Template.Child()
+    body_type_request = Gtk.Template.Child()
 
     def __init__(self, request: Request, **kwargs):
         super().__init__(**kwargs)
@@ -53,8 +54,9 @@ class RequestPage(Adw.Bin):
 
         self.request_text_body = Gtk.TextView(
             monospace= True,
-            hexpand= True,
-            vexpand= True
+            #hexpand= True,
+            vexpand= True,
+            height_request= 100
         )
 
         buffer = self.request_text_body.get_buffer()
@@ -104,14 +106,13 @@ class RequestPage(Adw.Bin):
     def on_body_type_change(self, widget: Adw.ToggleGroup, active_name: str):
         body_type = widget.get_property(active_name.get_name())
 
-        for child in self.body_type_widget:
-            if child.get_name() != "AdwToggleGroup":
-                self.body_type_widget.remove(child)
+        if body_type == "none":
+            self.body_type_request.set_child(None)
 
         if body_type == "raw":
-            self.body_type_widget.append(self.request_text_body)
+            self.body_type_request.set_child(self.request_text_body)
         if body_type == "form_data" or body_type == "form_urlencoded":
-            self.body_type_widget.append(self.body_params_list)
+            self.body_type_request.set_child(self.body_params_list)
 
     @Gtk.Template.Callback()
     def on_method_change(self, widget, _):

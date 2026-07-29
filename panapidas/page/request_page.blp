@@ -53,7 +53,7 @@ template $RequestPage: Adw.Bin {
     }
 
     Box {
-      orientation: horizontal;
+      orientation: vertical;
       margin-top: 5;
       spacing: 5;
 
@@ -74,13 +74,12 @@ template $RequestPage: Adw.Bin {
             name: "params";
             title: _("Params");
 
-            child: Box {
-              orientation: vertical;
-              spacing: 5;
+            child: Adw.Bin {
               hexpand: true;
               vexpand: true;
 
               ScrolledWindow {
+                max-content-height: 200;
                 hscrollbar-policy: never;
                 propagate-natural-height: true;
                 has-frame: false;
@@ -101,9 +100,7 @@ template $RequestPage: Adw.Bin {
             name: "headers";
             title: _("Headers");
 
-            child: Box {
-              orientation: vertical;
-              spacing: 5;
+            child: Adw.Bin {
               hexpand: true;
               vexpand: true;
 
@@ -131,7 +128,7 @@ template $RequestPage: Adw.Bin {
             child: Box body_type_widget {
               spacing: 5;
               orientation: vertical;
-              height-request: 250;
+              // height-request: 200;
 
               Adw.ToggleGroup {
                 active-name: "none";
@@ -161,7 +158,16 @@ template $RequestPage: Adw.Bin {
                   name: "raw";
                   label: _("raw");
                 }
+
               }
+                ScrolledWindow body_type_request {
+                  max-content-height: 200;
+                  hscrollbar-policy: never;
+                  propagate-natural-height: true;
+                  has-frame: false;
+                  valign: start;
+
+                }
             };
           }
         }
