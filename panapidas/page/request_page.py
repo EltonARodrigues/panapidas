@@ -36,6 +36,8 @@ class RequestPage(Adw.Bin):
     request_params_list = Gtk.Template.Child()
     body_type_request = Gtk.Template.Child()
     response_body = Gtk.Template.Child()
+    default_status_bar_label = Gtk.Template.Child()
+    response_status = Gtk.Template.Child()
 
     def __init__(self, request: Request, **kwargs):
         super().__init__(**kwargs)
@@ -91,6 +93,10 @@ class RequestPage(Adw.Bin):
             error_count=0
         )
 
+        self.default_status_bar_label.set_visible(False)
+        texto_base = self.response_status.get_text()
+        self.response_status.set_text(texto_base.format(response.status))
+        self.response_status.set_visible(True)
         buffer = self.response_body.get_buffer()
         buffer.set_text(response.body)
 

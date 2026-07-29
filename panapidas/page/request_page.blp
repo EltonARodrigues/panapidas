@@ -173,15 +173,22 @@ template $RequestPage: Adw.Bin {
           "response_status_bar",
         ]
 
-        Label {
-          label: _("Status: 200 OK");
+        Label default_status_bar_label {
+          label: _("Response");
+        }
+
+        Label response_status {
+          visible: false;
+          label: _("Status: {}");
         }
 
         Label {
+          visible: false;
           label: _("Time: 20 ms");
         }
 
         Label {
+          visible: false;
           label: _("Size: 20 B");
         }
       }
