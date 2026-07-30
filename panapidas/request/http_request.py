@@ -45,11 +45,20 @@ def request(
     url: str,
     body: dict = None,
     params: dict = None,
-    headers: dict = None,
+    headers: dict = {},
     method: str = "GET",
     data_as_json: bool = True,
     error_count: int = 0,
 ):
+    print(type(headers))
+    if body_type == "form_urlencoded":
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
+
+    if body_type == "form_data":
+        headers["Content-Type"] = "multipart/form-data; boundary=<calculated when request is sent>"
+
+    if data_as_json:
+        headers["Content-Type"] = "application/json"
 
     fields = None
     if method in ["GET", "DELETED", "HEAD"] or body_type == "form_data":

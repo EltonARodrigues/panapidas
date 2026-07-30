@@ -89,7 +89,7 @@ class RequestPage(Adw.Bin):
             url=self.url_entry.get_text(),
             body=body_str,
             params=self.body_params.get_dict(),
-            headers=self.headers.get_dict(),
+            headers=self.headers.get_dict() or {},
             method=self.http_method_list.props.selected_item.get_string(),
             data_as_json= self.body_type == "raw" ,
             body_type=self.body_type
