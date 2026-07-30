@@ -17,12 +17,15 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from gi.repository import Gtk, Adw
+import threading
+from concurrent.futures import ThreadPoolExecutor, Future
+
+from gi.repository import Gtk, Adw, GLib
 
 from panapidas.widget.map_list_menu import MapListMenu
 from panapidas.widget.body_source_view import BodySourceView
 from panapidas.model.map_entry import MapEntry
-from panapidas.request.http_request import request
+from panapidas.request.http_request import request, Response
 from panapidas.model.requests import Request
 
 @Gtk.Template(resource_path='/eltonarodrigues/org/codeberg/panapidas/page/request_page.ui')
@@ -43,6 +46,13 @@ class RequestPage(Adw.Bin):
 
     def __init__(self, request: Request, **kwargs):
         super().__init__(**kwargs)
+
+        self.active_request = False
+        self.task_counter = 0
+        self.is_destroyed = False
+        self.stop_event = threading.Event()
+
+        self.connect("destroy", self.on_page_destroy)
 
         self.request = request
 
@@ -76,25 +86,15 @@ class RequestPage(Adw.Bin):
         label.set_visible(True)
         label.set_text(label_template_text.format(text))
 
-    @Gtk.Template.Callback()
-    def on_send(self, widget):
+    def get_request_body_text(self):
         buffer = self.requestBodySourceView.get_buffer()
-        body_str = buffer.get_text(
+        return buffer.get_text(
             buffer.get_start_iter(),
             buffer.get_end_iter(),
             False
         )
 
-        response = request(
-            url=self.url_entry.get_text(),
-            body=body_str,
-            params=self.body_params.get_dict(),
-            headers=self.headers.get_dict() or {},
-            method=self.http_method_list.props.selected_item.get_string(),
-            data_as_json= self.body_type == "raw" ,
-            body_type=self.body_type
-        )
-
+    def render_response(self, response: Response):
         self.default_status_bar_label.set_visible(False)
 
         RequestPage.set_response_bar_label(self.response_status_label, response.status)
@@ -104,6 +104,46 @@ class RequestPage(Adw.Bin):
         buffer = self.response_body.get_buffer()
         buffer.set_text(response.body, -1)
 
+        return False
+
+    def call_request(self):
+        body = self.get_request_body_text() if self.body_type == "raw" else None
+        response = request(
+            url=self.url_entry.get_text(),
+            body=body,
+            params=self.body_params.get_dict(),
+            headers=self.headers.get_dict() or {},
+            method=self.http_method_list.props.selected_item.get_string(),
+            data_as_json= self.body_type == "raw" ,
+            body_type=self.body_type
+        )
+
+        GLib.idle_add(self.render_response, response)
+
+    @Gtk.Template.Callback()
+    def on_send(self, widget):
+        print(self.is_destroyed)
+        print(self.active_request)
+        if self.is_destroyed or self.active_request:
+            return None
+
+        self.stop_event.clear()
+
+        self.worker_thread = threading.Thread(
+            target=self.call_request,
+            daemon=True
+        )
+        self.worker_thread.start()
+
+    def on_request_cancel(self, button):
+        if self.is_running and not self.is_destroyed:
+            self.stop_event.set()
+
+    def on_page_destroy(self):
+        self.is_destroyed = True
+        if self.is_running:
+            self.stop_event.set()
+            self.is_running = False
 
     @Gtk.Template.Callback()
     def on_body_type_change(self, widget: Adw.ToggleGroup, active_name: str):

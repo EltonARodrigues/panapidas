@@ -79,3 +79,4 @@ class PalapidasWindow(Adw.ApplicationWindow):
 
             self.content_request.set_content(None)
 
+
