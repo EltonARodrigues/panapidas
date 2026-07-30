@@ -10,6 +10,8 @@ template $RequestPage: Adw.Bin {
     Box {
       orientation: horizontal;
       spacing: 5;
+      margin-start: 5;
+      margin-end: 5;
 
       Box {
         orientation: horizontal;
@@ -45,9 +47,20 @@ template $RequestPage: Adw.Bin {
         }
       }
 
-      Button {
-        label: _("SEND");
+      Button send_request_button{
+        label: _("Send");
+
         clicked => $on_send();
+      }
+
+      Button cancel_request_button {
+        label: _("Cancel");
+        visible: false;
+
+        styles ["destructive-action"]
+
+        clicked => $on_cancel();
+
       }
     }
 

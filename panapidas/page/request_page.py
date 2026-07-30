@@ -35,6 +35,8 @@ class RequestPage(Adw.Bin):
     http_method_list = Gtk.Template.Child()
     method_list = Gtk.Template.Child()
     url_entry = Gtk.Template.Child()
+    send_request_button = Gtk.Template.Child()
+    cancel_request_button = Gtk.Template.Child()
     request_header_list = Gtk.Template.Child()
     request_params_list = Gtk.Template.Child()
     body_type_request = Gtk.Template.Child()
@@ -48,7 +50,6 @@ class RequestPage(Adw.Bin):
         super().__init__(**kwargs)
 
         self.active_request = False
-        self.task_counter = 0
         self.is_destroyed = False
         self.stop_event = threading.Event()
 
@@ -97,6 +98,9 @@ class RequestPage(Adw.Bin):
     def render_response(self, response: Response):
         self.default_status_bar_label.set_visible(False)
 
+        self.send_request_button.set_visible(True)
+        self.cancel_request_button.set_visible(False)
+
         RequestPage.set_response_bar_label(self.response_status_label, response.status)
         RequestPage.set_response_bar_label(self.response_time_label, response.time_seconds)
         RequestPage.set_response_bar_label(self.response_size_label, response.response_size)
@@ -118,16 +122,21 @@ class RequestPage(Adw.Bin):
             body_type=self.body_type
         )
 
+        if self.stop_event.is_set():
+            return
+
         GLib.idle_add(self.render_response, response)
+        self.active_request = False
 
     @Gtk.Template.Callback()
     def on_send(self, widget):
-        print(self.is_destroyed)
-        print(self.active_request)
         if self.is_destroyed or self.active_request:
             return None
 
         self.stop_event.clear()
+        self.active_request = True
+        self.send_request_button.set_visible(False)
+        self.cancel_request_button.set_visible(True)
 
         self.worker_thread = threading.Thread(
             target=self.call_request,
@@ -135,15 +144,19 @@ class RequestPage(Adw.Bin):
         )
         self.worker_thread.start()
 
-    def on_request_cancel(self, button):
-        if self.is_running and not self.is_destroyed:
+    @Gtk.Template.Callback()
+    def on_cancel(self, button):
+        if self.active_request and not self.is_destroyed:
+            self.send_request_button.set_visible(True)
+            self.cancel_request_button.set_visible(False)
             self.stop_event.set()
+            self.active_request = False
 
     def on_page_destroy(self):
         self.is_destroyed = True
-        if self.is_running:
+        if self.active_request:
             self.stop_event.set()
-            self.is_running = False
+            self.active_request = False
 
     @Gtk.Template.Callback()
     def on_body_type_change(self, widget: Adw.ToggleGroup, active_name: str):
@@ -180,4 +193,5 @@ class RequestPage(Adw.Bin):
 
         return buffer.get_text(start_iter, end_iter, True)
         self.request.body = widget.get_text()
+
 
