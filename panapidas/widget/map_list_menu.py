@@ -30,14 +30,13 @@ class MapListMenu(GObject.Object):
     def __init__(self, list_box: Gtk.ListBox, items: list[MapEntry] = []):
         super().__init__()
 
-        self.list_box = list_box
         self.items = items.copy()
         self.items.append(MapEntry(id=len(self.items) + 1, key="", value=""))
 
         self.list_model = Gio.ListStore(item_type=MapEntry)
         self.list_model.splice(0, 0, additions=self.items)
 
-        self.list_box.bind_model(self.list_model, self._on_create_list_row)
+        list_box.bind_model(self.list_model, self._on_create_list_row)
 
     def _on_destroy_row(self, event_name: str, row_id: int):
         row_count = self.list_model.get_n_items()
@@ -108,7 +107,7 @@ class MapListMenu(GObject.Object):
         linked_box.append(value_entry)
         linked_box.append(close_button)
 
-        self.list_box.append(linked_box)
+        return linked_box
 
     def get_map_entry(self):
         return [row for row in self.list_model if len(row.key) > 0]
