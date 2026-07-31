@@ -1,0 +1,3 @@
+[project]
+vcs='git'
+config='flatpak:eltonarodrigues.org.codeberg.panapidas.json'

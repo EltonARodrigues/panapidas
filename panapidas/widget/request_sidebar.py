@@ -1,7 +1,3 @@
-import gi
-
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gio, Adw, GObject, Gdk, GLib
 
 from panapidas.model.requests import Request, RequestGroup, RequestItem
@@ -10,6 +6,7 @@ from panapidas.widget.rename_popover import RenamePopover
 
 RIGHT_MOUSE_BUTTON = 3
 
+
 @Gtk.Template(
     resource_path="/eltonarodrigues/org/codeberg/panapidas/widget/request_sidebar.ui"
 )
@@ -17,8 +14,8 @@ class RequestSidebar(Adw.NavigationPage):
     __gtype_name__ = "RequestSidebar"
 
     __gsignals__ = {
-        'request-selected': (GObject.SignalFlags.RUN_FIRST, None, (Request,)),
-        'save-requests': (GObject.SignalFlags.RUN_FIRST, None, ()),
+        "request-selected": (GObject.SignalFlags.RUN_FIRST, None, (Request,)),
+        "save-requests": (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
 
     request_view = Gtk.Template.Child()
@@ -48,7 +45,9 @@ class RequestSidebar(Adw.NavigationPage):
         self.selected = None
 
     @Gtk.Template.Callback()
-    def setup_factory(self, factory, list_item):
+    def on_setup_factory(
+        self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+    ):
         label = Gtk.Label()
         label.set_halign(Gtk.Align.START)
 
@@ -58,7 +57,9 @@ class RequestSidebar(Adw.NavigationPage):
         list_item.set_child(expander)
 
     @Gtk.Template.Callback()
-    def bind_factory(self, factory, list_item: Gtk.ListItem):
+    def on_bind_factory(
+        self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+    ):
         expander = list_item.get_child()
         label = expander.get_child()
 
@@ -73,30 +74,38 @@ class RequestSidebar(Adw.NavigationPage):
         gesture.connect("pressed", self.on_cell_right_click, expander, item)
         expander.add_controller(gesture)
 
-        list_item.changed_handler = item.connect('notify::name', self._on_item_changed, label)
+        list_item.changed_handler = item.connect(
+            "notify::name", self._on_item_changed, label
+        )
         label.set_text(item.name)
 
     @Gtk.Template.Callback()
-    def unbind_factory(self, factory, list_item: Gtk.ListItem):
+    def on_unbind_factory(self, _, list_item: Gtk.ListItem):
         tree_row = list_item.get_item()
 
         if tree_row is None:
             return
 
         item = tree_row.get_item()
-        changed_handler = item.changed_handler
-        handler = getattr(list_item, 'changed_handler', None)
+        handler = getattr(list_item, "changed_handler", None)
 
         if handler and item:
             item.disconnect(handler)
             list_item.changed_handler = None
 
-    def _on_item_changed(self, item, pspec, label):
+    def _on_item_changed(self, item: RequestItem, _, label: Gtk.Label):
         self.on_selected(self.selection, None)
         label.set_text(item.name)
 
-
-    def on_cell_right_click(self, gesture, n_press, x, y, expander, item: RequestItem):
+    def on_cell_right_click(
+        self,
+        _gesture: Gtk.GestureClick,
+        _n_press: int,
+        _x: float,
+        _y: float,
+        expander: Gtk.TreeExpander,
+        item: RequestItem,
+    ):
         self.target_item = item
         self.actual_popover_position = expander
         self.popover.create_menu_model(item)
@@ -104,11 +113,11 @@ class RequestSidebar(Adw.NavigationPage):
         self.popover.set_parent(self.actual_popover_position)
         self.popover.show()
 
-    def on_rename(self, widget, target):
-         self.rename_popover.unparent()
-         self.rename_popover.set_rename_item(self.target_item)
-         self.rename_popover.set_parent(self.actual_popover_position)
-         self.rename_popover.show()
+    def on_rename(self, _widget: Gtk.Button, _target: GLib.Variant):
+        self.rename_popover.unparent()
+        self.rename_popover.set_rename_item(self.target_item)
+        self.rename_popover.set_parent(self.actual_popover_position)
+        self.rename_popover.show()
 
     def on_selected(self, selection: Gtk.SingleSelection, _):
         self.selected = selection.get_selected_item()
@@ -120,7 +129,6 @@ class RequestSidebar(Adw.NavigationPage):
         item_type = GObject.type_name(item.__gtype__)
 
         if item_type == "RequestGroup":
-            return;
+            return
 
-        self.emit('request-selected', item)
-
+        self.emit("request-selected", item)

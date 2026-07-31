@@ -1,8 +1,6 @@
 import uuid
 
-import gi
-gi.require_version("Gtk", "4.0")
-from gi.repository import GObject, Gio
+from gi.repository import Gio, GObject
 
 from panapidas.model.map_entry import MapEntry
 
@@ -16,19 +14,19 @@ class RequestItem(GObject.GObject):
         self._changed_handler = None
 
     @GObject.Property(type=str)
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: str):
         self._name = value
 
     @GObject.Property(type=str)
-    def changed_handler(self):
+    def changed_handler(self) -> str:
         return self._changed_handler
 
     @changed_handler.setter
-    def changed_handler(self, value):
+    def changed_handler(self, value: str):
         self._changed_handler = value
 
 
@@ -41,24 +39,23 @@ class Request(RequestItem):
         name: str = None,
         method: str = None,
         url: str = None,
-        headers: MapEntry = [],
-        body = None,
-        params: MapEntry = [],
+        headers: MapEntry = None,
+        body=None,
+        params: MapEntry = None,
     ):
         super().__init__(name_atr=name)
-        self._id = str(uuid.uuid4()) if id is None else id,
-        # self.name = name
+        self._id = str(uuid.uuid4()) if id is None else id
         self.url = url
         self.method = method
-        self.headers = headers
-        self.params = params
+        self.headers = headers or []
+        self.params = params or []
         self.body = body
 
     @GObject.Property(type=str)
-    def id(self):
+    def id(self) -> str:
         return self._id[0]
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, any]:
         return {
             "id": self.id,
             "name": self.name,
@@ -73,15 +70,14 @@ class Request(RequestItem):
 class RequestGroup(RequestItem):
     __gtype_name__ = "RequestGroup"
 
-    def __init__(self, id= None, name=None, children_list=[]):
+    def __init__(self, id=None, name=None, children_list=[]):
 
-        super().__init__(name_atr = name)
+        super().__init__(name_atr=name)
         self.id = str(uuid.uuid4()) if id is None else id
-        # self.name = name
-        self.children = RequestGroup._children_builder(children_list)
+        self.children = RequestGroup.children_builder(children_list)
 
     @staticmethod
-    def _build_map_entry(map_list: list):
+    def build_map_entry(map_list: list) -> list[MapEntry]:
         return [
             MapEntry(
                 id=row["id"],
@@ -92,12 +88,16 @@ class RequestGroup(RequestItem):
         ]
 
     @staticmethod
-    def _children_builder(children_list=[]):
+    def children_builder(children_list=[]) -> Gio.ListStore:
         children_store = Gio.ListStore.new(RequestItem)
         for children in children_list:
             if "children" in children:
                 children_store.append(
-                    RequestGroup(id=children["id"], name=children["name"], children_list=children["children"])
+                    RequestGroup(
+                        id=children["id"],
+                        name=children["name"],
+                        children_list=children["children"],
+                    )
                 )
                 continue
 
@@ -107,18 +107,17 @@ class RequestGroup(RequestItem):
                     name=children["name"],
                     url=children["url"],
                     method=children["method"],
-                    headers=RequestGroup._build_map_entry(children["headers"]),
-                    params=RequestGroup._build_map_entry(children["params"]),
+                    headers=RequestGroup.build_map_entry(children["headers"]),
+                    params=RequestGroup.build_map_entry(children["params"]),
                     body=children["body"],
                 )
             )
 
         return children_store
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, any]:
         return {
             "id": self.id,
             "name": self.name,
             "children": [children.to_dict() for children in self.children],
         }
-

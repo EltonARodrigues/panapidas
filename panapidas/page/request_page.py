@@ -20,17 +20,19 @@
 import threading
 from concurrent.futures import ThreadPoolExecutor, Future
 
-from gi.repository import Gtk, Adw, GLib
+from gi.repository import Adw, GLib, Gtk
 
 from panapidas.widget.map_list_menu import MapListMenu
 from panapidas.widget.body_source_view import BodySourceView
-from panapidas.model.map_entry import MapEntry
 from panapidas.request.http_request import request, Response
 from panapidas.model.requests import Request
 
-@Gtk.Template(resource_path='/eltonarodrigues/org/codeberg/panapidas/page/request_page.ui')
+
+@Gtk.Template(
+    resource_path="/eltonarodrigues/org/codeberg/panapidas/page/request_page.ui"
+)
 class RequestPage(Adw.Bin):
-    __gtype_name__ = 'RequestPage'
+    __gtype_name__ = "RequestPage"
 
     http_method_list = Gtk.Template.Child()
     method_list = Gtk.Template.Child()
@@ -49,37 +51,40 @@ class RequestPage(Adw.Bin):
     def __init__(self, request: Request, **kwargs):
         super().__init__(**kwargs)
 
+        self.request = request
+
+        self.connect("destroy", self._on_page_destroy)
+
         self.active_request = False
         self.is_destroyed = False
         self.stop_event = threading.Event()
 
-        self.connect("destroy", self.on_page_destroy)
+        self._load_request(request)
 
-        self.request = request
+        self.body_type = None
 
-        self.http_method_list.set_selected(self.method_list.find(request.method or "GET"))
+    def _load_request(self, request: Request):
+        self.http_method_list.set_selected(
+            self.method_list.find(request.method or "GET")
+        )
 
         self.url_entry.set_text(request.url or "")
 
         self.headers = MapListMenu(self.request_header_list, request.headers)
-        self.headers.connect("map-changed", self.on_map_change, "headers")
+        self.headers.connect("map-changed", self._on_map_change, "headers")
 
         self.params = MapListMenu(self.request_params_list, request.params)
-        self.params.connect("map-changed", self.on_map_change, "params")
+        self.params.connect("map-changed", self._on_map_change, "params")
 
         self.body_params_list = Gtk.ListBox(selection_mode=0)
 
         body_params_filter = request.body if type(request.body) == "list" else []
         self.body_params = MapListMenu(self.body_params_list, body_params_filter)
 
-        body_params_filter = request.body if type(request.body) == "list" else []
-
         self.requestBodySourceView = BodySourceView()
         self.requestBodySourceView.set_hexpand(True)
         self.requestBodySourceView.set_halign(Gtk.Align.FILL)
         self.requestBodySourceView.set_size_request(-1, 500)
-
-        self.body_type=None
 
     @staticmethod
     def set_response_bar_label(label: Gtk.Label, text: str):
@@ -87,49 +92,65 @@ class RequestPage(Adw.Bin):
         label.set_visible(True)
         label.set_text(label_template_text.format(text))
 
-    def get_request_body_text(self):
-        buffer = self.requestBodySourceView.get_buffer()
-        return buffer.get_text(
-            buffer.get_start_iter(),
-            buffer.get_end_iter(),
-            False
-        )
-
-    def render_response(self, response: Response):
+    def _render_response(self, response: Response) -> bool:
         self.default_status_bar_label.set_visible(False)
 
         self.send_request_button.set_visible(True)
         self.cancel_request_button.set_visible(False)
 
         RequestPage.set_response_bar_label(self.response_status_label, response.status)
-        RequestPage.set_response_bar_label(self.response_time_label, response.time_seconds)
-        RequestPage.set_response_bar_label(self.response_size_label, response.response_size)
+        RequestPage.set_response_bar_label(
+            self.response_time_label, response.time_seconds
+        )
+        RequestPage.set_response_bar_label(
+            self.response_size_label, response.response_size
+        )
 
         buffer = self.response_body.get_buffer()
         buffer.set_text(response.body, -1)
 
         return False
 
-    def call_request(self):
-        body = self.get_request_body_text() if self.body_type == "raw" else None
+    def _get_request_body_text(self) -> str:
+        buffer = self.requestBodySourceView.get_buffer()
+        return buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
+
+    def _call_request(self):
+        body = self._get_request_body_text() if self.body_type == "raw" else None
         response = request(
             url=self.url_entry.get_text(),
             body=body,
             params=self.body_params.get_dict(),
             headers=self.headers.get_dict() or {},
             method=self.http_method_list.props.selected_item.get_string(),
-            data_as_json= self.body_type == "raw" ,
-            body_type=self.body_type
+            data_as_json=self.body_type == "raw",
+            body_type=self.body_type,
         )
 
         if self.stop_event.is_set():
             return
 
-        GLib.idle_add(self.render_response, response)
+        GLib.idle_add(self._render_response, response)
         self.active_request = False
 
+    def _on_map_change(self, widget: MapListMenu, type: str):
+        values = widget.get_map_entry()
+
+        if type == "params":
+            self.request.params = values
+
+        if type == "headers":
+            self.request.headers = values
+
+    def _on_page_destroy(self):
+        self.is_destroyed = True
+
+        if self.active_request:
+            self.stop_event.set()
+            self.active_request = False
+
     @Gtk.Template.Callback()
-    def on_send(self, widget):
+    def on_send(self, _):
         if self.is_destroyed or self.active_request:
             return None
 
@@ -138,23 +159,14 @@ class RequestPage(Adw.Bin):
         self.send_request_button.set_visible(False)
         self.cancel_request_button.set_visible(True)
 
-        self.worker_thread = threading.Thread(
-            target=self.call_request,
-            daemon=True
-        )
+        self.worker_thread = threading.Thread(target=self._call_request, daemon=True)
         self.worker_thread.start()
 
     @Gtk.Template.Callback()
-    def on_cancel(self, button):
+    def on_cancel(self, _):
         if self.active_request and not self.is_destroyed:
             self.send_request_button.set_visible(True)
             self.cancel_request_button.set_visible(False)
-            self.stop_event.set()
-            self.active_request = False
-
-    def on_page_destroy(self):
-        self.is_destroyed = True
-        if self.active_request:
             self.stop_event.set()
             self.active_request = False
 
@@ -167,31 +179,15 @@ class RequestPage(Adw.Bin):
 
         if self.body_type == "raw":
             self.body_type_request.set_child(self.requestBodySourceView)
+
         if self.body_type in ["form_data", "form_urlencoded"]:
             self.body_type_request.set_child(self.body_params_list)
 
     @Gtk.Template.Callback()
-    def on_method_change(self, widget, _):
-        method=widget.props.selected_item.get_string()
+    def on_method_change(self, widget: Gtk.DropDown, _):
+        method = widget.props.selected_item.get_string()
         self.request.method = method
 
     @Gtk.Template.Callback()
-    def on_url_change(self, widget):
+    def on_url_change(self, widget: Gtk.Entry):
         self.request.url = widget.get_text()
-
-    def on_map_change(self, widget, type: str):
-        values = widget.get_map_entry()
-
-        if type == "params":
-            self.request.params = values
-        if type == "headers":
-            self.request.headers = values
-
-    def on_request_body_change(self, buffer):
-        start_iter = buffer.get_start_iter()
-        end_iter = buffer.get_end_iter()
-
-        return buffer.get_text(start_iter, end_iter, True)
-        self.request.body = widget.get_text()
-
-

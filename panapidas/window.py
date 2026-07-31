@@ -20,23 +20,18 @@
 import os
 import json
 
-from gi.repository import Adw
-from gi.repository import Gtk, GObject, Gio, GLib
+from gi.repository import Adw, Gtk, GObject
 
 from panapidas.widget.request_sidebar import RequestSidebar
 from panapidas.page.request_page import RequestPage
-from panapidas.request.http_request import request
-from panapidas.model.requests import Request, RequestGroup
-from panapidas.model.map_entry import MapEntry
+from panapidas.model.requests import Request
 
 
 @Gtk.Template(resource_path="/eltonarodrigues/org/codeberg/panapidas/window.ui")
 class PalapidasWindow(Adw.ApplicationWindow):
     __gtype_name__ = "PalapidasWindow"
 
-    __gsignals__ = {
-        'save-requests': (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-    }
+    __gsignals__ = {"save-requests": (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())}
 
     split_view = Gtk.Template.Child()
     content_request = Gtk.Template.Child()
@@ -49,7 +44,7 @@ class PalapidasWindow(Adw.ApplicationWindow):
         self.request_pages = {}
         self.save_request_button.set_visible(False)
 
-        group_list_model.connect("items-changed", self.on_list_model_change)
+        group_list_model.connect("items-changed", self._on_list_model_change)
 
         sidebar = RequestSidebar(group_list_model)
         self.split_view.set_sidebar(sidebar)
@@ -67,7 +62,9 @@ class PalapidasWindow(Adw.ApplicationWindow):
     def on_request_save(self, _):
         self.emit("save-requests")
 
-    def on_list_model_change(self, list_model: Gtk.TreeListModel, position: int,removed: int, added: int ):
+    def _on_list_model_change(
+        self, list_model: Gtk.TreeListModel, position: int, removed: int, added: int
+    ):
         if removed > 0:
             actual_ids = [item.get_item().id for item in list_model]
 
@@ -78,5 +75,3 @@ class PalapidasWindow(Adw.ApplicationWindow):
                 self.request_pages.pop(k, None)
 
             self.content_request.set_content(None)
-
-

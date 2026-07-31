@@ -1,9 +1,8 @@
-import gi
-gi.require_version('Gtk', '4.0')
 from gi.repository import GObject
 
+
 class MapEntry(GObject.Object):
-    __gtype_name__ = 'MapEntry'
+    __gtype_name__ = "MapEntry"
 
     def __init__(self, id: int, key: str, value: str):
         super().__init__()
@@ -13,15 +12,15 @@ class MapEntry(GObject.Object):
         self._value = value
 
     @GObject.Property(type=int)
-    def id(self):
+    def id(self) -> int:
         return self._id
 
     @GObject.Property(type=str)
-    def key(self):
+    def key(self) -> str:
         return self._key
 
     @GObject.Property(type=str)
-    def value(self):
+    def value(self) -> str:
         return self._value
 
     @key.setter
@@ -38,7 +37,7 @@ class MapEntry(GObject.Object):
     def __str__(self):
         return f"{self._id} -> ({self._key}:{self._value})"
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, str]:
         return {
             "id": self.id,
             "key": self.key,

@@ -2,7 +2,6 @@ import sys
 import os
 import json
 
-import gi
 from gi.repository import GLib, GObject, Gio
 
 from panapidas.model.requests import RequestGroup, RequestItem, Request
@@ -10,7 +9,8 @@ from panapidas.model.requests import RequestGroup, RequestItem, Request
 APPLICATION_NAME = "panapidas"
 APPLICATION_DATA_FILENAME = "requests.json"
 
-class DataManagement():
+
+class DataManagement:
 
     def __init__(self):
         self.data_dir = GLib.get_user_data_dir()
@@ -21,12 +21,14 @@ class DataManagement():
     def load(self) -> RequestGroup:
         if not os.path.exists(self.data_path):
             print("Arquivo não encontrado. Retornando lista vazia.")
-            return []
+            return RequestGroup("ROOT", "", [])
 
         with open(self.data_path, "r", encoding="utf-8") as f:
             requests_dict = json.load(f)
 
-        self._request_group =  RequestGroup(requests_dict["id"], requests_dict["name"], requests_dict["children"])
+        self._request_group = RequestGroup(
+            requests_dict["id"], requests_dict["name"], requests_dict["children"]
+        )
         return self._request_group
 
     def save(self, store: Gio.ListStore):
@@ -37,13 +39,13 @@ class DataManagement():
             objeto = store.get_item(i)
             self._request_group.children.append(objeto)
 
-        with open(self.data_path, 'w', encoding='utf-8') as f:
+        with open(self.data_path, "w", encoding="utf-8") as f:
             json.dump(self._request_group.to_dict(), f, indent=2, ensure_ascii=False)
 
         print(f"Dados salvos com sucesso em: {self.data_path}")
 
     @staticmethod
-    def add_item_to_object(item: [RequestItem], id: str, new_item: RequestItem):
+    def add_item_to_object(item: list[RequestItem], id: str, new_item: RequestItem):
         if isinstance(item, RequestGroup):
             if item.id == id:
                 item.children.append(new_item)
@@ -96,4 +98,3 @@ class DataManagement():
         finded, position, finded_store = DataManagement.find_item_index(store, id)
         if finded:
             finded_store[position].name = new_name
-

@@ -17,57 +17,49 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import List
+from gi.repository import Adw, Gtk, GObject, Gio
 
-from gi.repository import Adw
-from gi.repository import Gtk, GObject, Gio
 from panapidas.model.map_entry import MapEntry
 
 
 class MapListMenu(GObject.Object):
     __gtype_name__ = "MapListMenu"
 
-    __gsignals__ = {
-        'map-changed': (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())
-    }
+    __gsignals__ = {"map-changed": (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())}
 
-    def __init__(self, list_box: Gtk.ListBox, items = []):
+    def __init__(self, list_box: Gtk.ListBox, items: list[MapEntry] = []):
         super().__init__()
+
         self.list_box = list_box
         self.items = items.copy()
-        self.items.append(MapEntry(id=len(self.items)+1, key="", value=""))
+        self.items.append(MapEntry(id=len(self.items) + 1, key="", value=""))
 
         self.list_model = Gio.ListStore(item_type=MapEntry)
-        self.list_model.splice(0,0,additions=self.items)
-        self.list_box.bind_model(self.list_model, self.create_list_row);
+        self.list_model.splice(0, 0, additions=self.items)
 
-    def on_map_change(self):
-        # items = [row for row in self.list_model if len(row.key) > 0]
-        self.emit('map-changed')
+        self.list_box.bind_model(self.list_model, self._on_create_list_row)
 
-    def get_map_entry(self):
-        return [row for row in self.list_model if len(row.key) > 0]
-
-    def get_dict(self):
-        items_dict = { row.key: row.value for row in self.list_model if len(row.key) > 0}
-        return items_dict if len(items_dict.keys()) > 0 else None
-
-    def destroy_row(self, event_name: str, row_id: int):
+    def _on_destroy_row(self, event_name: str, row_id: int):
         row_count = self.list_model.get_n_items()
 
         for index in range(row_count):
             item = self.list_model.get_item(index)
-            if(index + 1 == row_count):
-                print(f"Item com ID {row_id} INGNORADO!")
+
+            if index + 1 == row_count:
                 return False
 
             if item.id == row_id:
                 self.list_model.remove(index)
-                print(f"Item com ID {row_id} removido com sucesso!")
                 return True
-        self.on_map_change()
 
-    def handler_typing(self, entry: GObject.Object, entry_type: str, list_model: GObject.Object):
+        self._on_map_change()
+
+    def _on_map_change(self):
+        self.emit("map-changed")
+
+    def _on_entry_changed(
+        self, entry: GObject.Object, entry_type: str, list_model: GObject.Object
+    ):
         new_id = list_model.id + 1
         has_row = [model for model in self.list_model if model.id == new_id]
 
@@ -75,47 +67,42 @@ class MapListMenu(GObject.Object):
             self.list_model.append(MapEntry(id=new_id, key="", value=""))
 
         text_value = entry.get_text()
+
         if entry_type == "key":
             list_model.key = text_value
+
         if entry_type == "value":
             list_model.value = text_value
-        self.on_map_change()
 
-    def create_list_row(self, model):
+        self._on_map_change()
+
+    def _on_create_list_row(self, model: MapEntry):
         linked_box = Gtk.Box(
-            margin_top= 8,
-            margin_start= 8,
-            margin_end= 8,
-            margin_bottom= 8,
+            margin_top=8,
+            margin_start=8,
+            margin_end=8,
+            margin_bottom=8,
             halign="fill",
             orientation="horizontal",
         )
         linked_box.set_css_classes(["linked"])
 
-        key_entry = Gtk.Entry(
-            hexpand=True,
-            placeholder_text="Key",
-            text=model.key
-        )
-        key_entry.connect("changed", self.handler_typing, "key", model)
+        key_entry = Gtk.Entry(hexpand=True, placeholder_text="Key", text=model.key)
+        key_entry.connect("changed", self._on_entry_changed, "key", model)
 
         value_entry = Gtk.Entry(
-            hexpand=True,
-            placeholder_text="Value",
-            text=model.value
+            hexpand=True, placeholder_text="Value", text=model.value
         )
-
-        value_entry.connect("changed", self.handler_typing, "value", model)
-
+        value_entry.connect("changed", self._on_entry_changed, "value", model)
 
         close_button = Gtk.Button(
             icon_name="edit-delete-symbolic",
             tooltip_text="Remover item",
             halign="center",
-            valign="center"
+            valign="center",
         )
 
-        close_button.connect("clicked", self.destroy_row, model.id)
+        close_button.connect("clicked", self._on_destroy_row, model.id)
 
         linked_box.append(key_entry)
         linked_box.append(value_entry)
@@ -123,6 +110,9 @@ class MapListMenu(GObject.Object):
 
         self.list_box.append(linked_box)
 
+    def get_map_entry(self):
+        return [row for row in self.list_model if len(row.key) > 0]
 
-
-
+    def get_dict(self):
+        items_dict = {row.key: row.value for row in self.list_model if len(row.key) > 0}
+        return items_dict if len(items_dict.keys()) > 0 else None

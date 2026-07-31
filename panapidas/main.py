@@ -18,11 +18,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import sys
-import gi
 import os
 import json
 
 from gettext import gettext as _
+
+import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
@@ -32,7 +33,7 @@ from gi.repository import Gtk, Gio, Adw, GLib, GObject, GtkSource, Gdk
 
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.data_management import DataManagement
-from .window import PalapidasWindow
+from panapidas.window import PalapidasWindow
 
 APPLICATION_NAME = "panapidas"
 APPLICATION_DATA_FILENAME = "requests.json"
@@ -56,18 +57,28 @@ class PalapidasApplication(Adw.Application):
         self.cache_por_id = {}
 
         self.request_group_store = Gio.ListStore.new(RequestItem)
-        self.request_group_store.splice(0,0,additions=request_group.children)
-        self.group_list_model = Gtk.TreeListModel.new(self.request_group_store, False, True, self.create_child_model)
+        self.request_group_store.splice(0, 0, additions=request_group.children)
+        self.group_list_model = Gtk.TreeListModel.new(
+            self.request_group_store, False, True, self.create_child_model
+        )
 
         self.create_action("quit", lambda *_: self.quit(), None, ["<control>q"])
         self.create_action("about", self.on_about_action)
         self.create_action("preferences", self.on_preferences_action)
         self.create_action("create_folder", self.on_create)
         self.create_action("create_request", self.on_create)
-        self.create_action("create-sub-folder", self.on_create, GLib.VariantType.new("s"))
-        self.create_action("create-sub-request", self.on_create, GLib.VariantType.new("s"))
+        self.create_action(
+            "create-sub-folder", self.on_create, GLib.VariantType.new("s")
+        )
+        self.create_action(
+            "create-sub-request", self.on_create, GLib.VariantType.new("s")
+        )
         self.create_action("delete-item", self.on_create, GLib.VariantType.new("s"))
-        self.create_action("rename-item", self.on_create, GLib.VariantType.new_tuple([GLib.VariantType('s'), GLib.VariantType('s')]))
+        self.create_action(
+            "rename-item",
+            self.on_create,
+            GLib.VariantType.new_tuple([GLib.VariantType("s"), GLib.VariantType("s")]),
+        )
 
     def create_child_model(self, item):
         item_type = GObject.type_name(item.__gtype__)
@@ -86,7 +97,9 @@ class PalapidasApplication(Adw.Application):
 
         win = self.props.active_window
         if not win:
-            win = PalapidasWindow(application=self, group_list_model=self.group_list_model)
+            win = PalapidasWindow(
+                application=self, group_list_model=self.group_list_model
+            )
             win.connect("save-requests", self.on_save_request)
         win.present()
 
@@ -114,17 +127,17 @@ class PalapidasApplication(Adw.Application):
         if action_name == "create-sub-folder":
             parent_item_id = target.unpack()
             DataManagement.add_item(
-                item_list= self.request_group_store,
-                id= parent_item_id,
-                new_item= RequestGroup(name = "New Folder")
+                item_list=self.request_group_store,
+                id=parent_item_id,
+                new_item=RequestGroup(name="New Folder"),
             )
 
         if action_name == "create-sub-request":
             parent_item_id = target.unpack()
             DataManagement.add_item(
-                item_list= self.request_group_store,
-                id= parent_item_id,
-                new_item= Request(name = "New Request")
+                item_list=self.request_group_store,
+                id=parent_item_id,
+                new_item=Request(name="New Request"),
             )
 
         if action_name == "delete-item":
@@ -132,19 +145,17 @@ class PalapidasApplication(Adw.Application):
             DataManagement.remove_by_id(self.request_group_store, parent_item_id)
 
         if action_name == "create_folder":
-            new_group = RequestGroup(name= "New Group")
+            new_group = RequestGroup(name="New Group")
             self.request_group_store.append(new_group)
 
         if action_name == "create_request":
-            new_request = Request(name= "New Request")
+            new_request = Request(name="New Request")
             self.request_group_store.append(new_request)
 
         if action_name == "rename-item":
             parent_item_id, new_name = target
             DataManagement.rename_item(
-                store=self.request_group_store,
-                id=parent_item_id,
-                new_name=new_name
+                store=self.request_group_store, id=parent_item_id, new_name=new_name
             )
 
         self.dataManagement.save(self.request_group_store)
@@ -165,24 +176,24 @@ class PalapidasApplication(Adw.Application):
         if shortcuts:
             self.set_accels_for_action(f"app.{name}", shortcuts)
 
+
 # FIX - remover load_css
 def load_css():
-     css_provider = Gtk.CssProvider()
-     try:
-         css_provider.load_from_resource("/eltonarodrigues/org/codeberg/panapidas/style.css")
-         display = Gdk.Display.get_default()
-         Gtk.StyleContext.add_provider_for_display(
-             display,
-             css_provider,
-             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-         )
-     except Exception as e:
-         print(f"load_css error: {e}")
+    css_provider = Gtk.CssProvider()
+    try:
+        css_provider.load_from_resource(
+            "/eltonarodrigues/org/codeberg/panapidas/style.css"
+        )
+        display = Gdk.Display.get_default()
+        Gtk.StyleContext.add_provider_for_display(
+            display, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+    except Exception as e:
+        print(f"load_css error: {e}")
 
-def main(version):
+
+def main(VERSION):
     """The application's entry point."""
     load_css()
     app = PalapidasApplication()
     return app.run(sys.argv)
-
-

@@ -1,7 +1,5 @@
 from gi.repository import Gtk, GtkSource, Adw
 
-from panapidas.model.requests import Request, RequestGroup, RequestItem
-
 
 @Gtk.Template(
     resource_path="/eltonarodrigues/org/codeberg/panapidas/widget/body_source_view.ui"
@@ -23,6 +21,7 @@ class BodySourceView(GtkSource.View):
         self.scheme_manager = GtkSource.StyleSchemeManager.get_default()
         self.style_manager = Adw.StyleManager.get_default()
         self.style_manager.connect("notify::dark", self.update_style)
+
         self.update_style()
 
     def update_style(self):

@@ -1,9 +1,11 @@
 import json
 import time
 import typing
+
 import urllib3
 
 from urllib.parse import urlencode, urlsplit
+
 
 class Response(typing.NamedTuple):
     body: str
@@ -33,29 +35,31 @@ class Response(typing.NamedTuple):
         return f"{minutes:.2f} min ({self.time_seconds:.2f} s)"
 
     @property
-    def response_size(bytes) -> str:
-        for unidade in ['bytes', 'KB', 'MB', 'GB']:
-            if bytes < 1024.0:
-                return f"{bytes:.2f} {unidade}"
-            bytes /= 1024.0
-        return f"{bytes:.2f} TB"
+    def response_size(self) -> str:
+        for unidade in ["bytes", "KB", "MB", "GB"]:
+            if self.response_size < 1024.0:
+                return f"{self.response_size:.2f} {unidade}"
+            self.response_size /= 1024.0
+        return f"{self.response_size:.2f} TB"
+
 
 def request(
     body_type: str,
     url: str,
     body: dict = None,
     params: dict = None,
-    headers: dict = {},
+    headers: dict = None,
     method: str = "GET",
     data_as_json: bool = True,
-    error_count: int = 0,
-):
+) -> Response:
     print(type(headers))
     if body_type == "form_urlencoded":
         headers["Content-Type"] = "application/x-www-form-urlencoded"
 
     if body_type == "form_data":
-        headers["Content-Type"] = "multipart/form-data; boundary=<calculated when request is sent>"
+        headers["Content-Type"] = (
+            "multipart/form-data; boundary=<calculated when request is sent>"
+        )
 
     if data_as_json:
         headers["Content-Type"] = "application/json"
@@ -64,7 +68,9 @@ def request(
     if method in ["GET", "DELETED", "HEAD"] or body_type == "form_data":
         fields = params
 
-    if params is not None and (method in ["POST", "PUT"] or body_type == "form_urlencoded"):
+    if params is not None and (
+        method in ["POST", "PUT"] or body_type == "form_urlencoded"
+    ):
         print(params)
         encoded_args = urlencode(params)
         url = url + encoded_args
@@ -72,12 +78,12 @@ def request(
     json_body = body if data_as_json else None
 
     teste = {
-        "method":method,
-        "url":url,
-        "json":json_body,
+        "method": method,
+        "url": url,
+        "json": json_body,
         "fields": fields,
-        "headers":headers,
-        "preload_content":False
+        "headers": headers,
+        "preload_content": False,
     }
     print(teste)
 
@@ -89,9 +95,9 @@ def request(
             method=method,
             url=urlsplit(url).geturl(),
             json=json_body,
-            fields= fields,
+            fields=fields,
             headers=headers,
-            preload_content=False
+            preload_content=False,
         )
         time_ttfb = time.perf_counter() - time_start_count
 
@@ -101,14 +107,16 @@ def request(
 
         print(f"⏱️  TTFB (Server Processing + Network): {time_ttfb:.4f} segundos")
         print(f"⏱️  Tempo Total (Usuário esperou):      {time_total:.4f} segundos")
-        print(f"📦 Tempo gasto apenas baixando o JSON:  {time_total - time_ttfb:.4f} segundos")
+        print(
+            f"📦 Tempo gasto apenas baixando o JSON:  {time_total - time_ttfb:.4f} segundos"
+        )
 
         return Response(
-            body= dados.decode('utf-8'),
-            headers= resp.headers,
-            status= resp.status,
-            time_seconds= time_ttfb,
-            response_size=len(dados)
+            body=dados.decode("utf-8"),
+            headers=resp.headers,
+            status=resp.status,
+            time_seconds=time_ttfb,
+            response_size=len(dados),
         )
 
     except urllib3.exceptions.NewConnectionError:
@@ -122,17 +130,17 @@ def request(
 
     except ValueError as e:
         return Response(
-            body= str(e),
-            headers= None,
-            status= None,
+            body=str(e),
+            headers=None,
+            status=None,
             # time= time_ttfb,
         )
 
     except Exception as e:
         print(e)
         return Response(
-            body= "",
-            headers= None,
-            status= None,
+            body="",
+            headers=None,
+            status=None,
             # time= time_ttfb,
         )
