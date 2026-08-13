@@ -10,19 +10,33 @@ template $PalapidasWindow: Adw.ApplicationWindow {
     content: Adw.NavigationPage request_navigation {
       title: _("Request");
 
-      child: Adw.ToolbarView content_request {
-        [top]
-        Adw.HeaderBar {
+      child: Adw.NavigationView page_navigation_view {
+        Adw.NavigationPage request_layout {
+          title: _("Requests");
 
-          [end]
-          Button save_request_button {
-            // sensitive: false;
-            label: _("Save");
+          Adw.ToolbarView content_request {
+            [top]
+            Adw.HeaderBar {
+              [end]
+              Button save_request_button {
+                // sensitive: false;
+                label: _("Save");
 
-            styles ["suggested-action"]
+                styles [
+                  "suggested-action",
+                ]
 
-            clicked => $on_request_save();
+                clicked => $on_request_save();
+              }
+            }
           }
+        }
+
+        $EnvPage env_layout {
+          env-selected => $on_env_selected();
+        }
+
+        $EnvConfigPage env_config_layout {
         }
       };
     };

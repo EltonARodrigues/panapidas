@@ -1,0 +1,37 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $EnvConfigPage: Adw.NavigationPage {
+  title: _("env_config");
+
+  child: Adw.ToolbarView content_request {
+    [top]
+    Adw.HeaderBar {
+      [end]
+      Button save_request_button {
+        // sensitive: false;
+        label: _("Save");
+
+        styles [
+          "suggested-action",
+        ]
+
+        // clicked => $on_request_save();
+      }
+    }
+
+    content: Adw.Bin {
+      ScrolledWindow {
+        hscrollbar-policy: never;
+        propagate-natural-height: true;
+        has-frame: false;
+        valign: start;
+
+        ListBox env_list {
+          selection-mode: none;
+        }
+      }
+
+    };
+  };
+}

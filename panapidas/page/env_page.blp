@@ -1,0 +1,54 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $EnvPage: Adw.NavigationPage {
+  title: _('Envs');
+
+  child: Adw.ToolbarView content_request {
+    [top]
+    Adw.HeaderBar {
+      show-title: false;
+
+      [center]
+      Box {
+        valign: center;
+        halign: center;
+
+        styles [
+          "linked",
+        ]
+
+        SearchEntry search_entry {
+          placeholder-text: _("Search Env");
+        }
+
+        Button save_request_button {
+          // sensitive: false;
+          icon-name: "list-add-symbolic";
+
+          styles [
+            "suggested-action",
+          ]
+
+          // clicked => $on_request_save();
+        }
+      }
+    }
+
+    content: Box {
+      orientation: vertical;
+      spacing: 12;
+
+      ListBox list_envs {
+        hexpand: true;
+        valign: start;
+        activate-on-single-click: true;
+        selection-mode: single;
+
+        styles [
+          "boxed-list",
+        ]
+      }
+    };
+  };
+}

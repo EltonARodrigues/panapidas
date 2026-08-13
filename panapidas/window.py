@@ -20,10 +20,12 @@
 import os
 import json
 
-from gi.repository import Adw, Gtk, GObject
+from gi.repository import Adw, Gio, Gtk, GObject
 
 from panapidas.widget.request_sidebar import RequestSidebar
 from panapidas.page.request_page import RequestPage
+from panapidas.page.env_page import EnvPage
+from panapidas.page.env_config_page import EnvConfigPage
 from panapidas.model.requests import Request
 
 
@@ -34,6 +36,10 @@ class PalapidasWindow(Adw.ApplicationWindow):
     __gsignals__ = {"save-requests": (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())}
 
     split_view = Gtk.Template.Child()
+    page_navigation_view = Gtk.Template.Child()
+    request_layout = Gtk.Template.Child()
+    env_layout = Gtk.Template.Child()
+    env_config_layout = Gtk.Template.Child()
     content_request = Gtk.Template.Child()
     request_navigation = Gtk.Template.Child()
     save_request_button = Gtk.Template.Child()
@@ -49,6 +55,18 @@ class PalapidasWindow(Adw.ApplicationWindow):
         sidebar = RequestSidebar(group_list_model)
         self.split_view.set_sidebar(sidebar)
         sidebar.connect("request-selected", self.on_request_selected)
+
+        action = Gio.SimpleAction.new('env_page', None)
+        action.connect('activate', self._on_open_envs)
+
+        self.add_action(action)
+
+    def _on_open_envs(self, _action: Gio.SimpleAction, _target):
+        self.page_navigation_view.push(self.env_layout)
+
+    @Gtk.Template.Callback()
+    def on_env_selected(self, widget: EnvPage):
+        self.page_navigation_view.push(self.env_config_layout)
 
     def on_request_selected(self, sidebar: RequestSidebar, request: Request):
         if request.id not in self.request_pages:
@@ -75,3 +93,4 @@ class PalapidasWindow(Adw.ApplicationWindow):
                 self.request_pages.pop(k, None)
 
             self.content_request.set_content(None)
+
