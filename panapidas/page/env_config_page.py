@@ -1,9 +1,7 @@
-from gi.repository import Adw, GLib, Gtk, GObject
+from gi.repository import Adw, Gtk, GObject
 
 from panapidas.widget.map_list_menu import MapListMenu
-from panapidas.widget.body_source_view import BodySourceView
-from panapidas.request.http_request import request, Response
-from panapidas.model.requests import Request
+from panapidas.model.env_object import EnvObject
 
 
 @Gtk.Template(
@@ -12,15 +10,28 @@ from panapidas.model.requests import Request
 class EnvConfigPage(Adw.NavigationPage):
     __gtype_name__ = "EnvConfigPage"
 
+    __gsignals__ = {
+        "env-saved": (GObject.SignalFlags.RUN_FIRST, None, ()),
+    }
+
     env_list = Gtk.Template.Child()
+    save_env_button = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.env_group = None
+        self.params = None
+        self.env_object = None
 
-        self.params = MapListMenu(self.env_list, [])
+    def set_env(self, env_object: EnvObject):
+        self.env_object = env_object
+        self.params = MapListMenu(self.env_list, env_object.envs)
         self.params.connect("map-changed", self._on_map_change)
 
     def _on_map_change(self, widget: MapListMenu):
-        self.env_list = widget.get_map_entry()
+        self.env_object.envs = widget.get_map_entry()
+        self.save_env_button.set_sensitive(True)
+
+    @Gtk.Template.Callback()
+    def on_env_save(self, _: Gtk.Button):
+        self.emit("env-saved")

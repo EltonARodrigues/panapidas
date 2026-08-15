@@ -32,6 +32,7 @@ gi.require_version("GtkSource", "5")
 from gi.repository import Gtk, Gio, Adw, GLib, GObject, GtkSource, Gdk
 
 from panapidas.model.requests import Request, RequestGroup, RequestItem
+from panapidas.model.env_object import EnvObject
 from panapidas.data_management import DataManagement
 from panapidas.window import PalapidasWindow
 
@@ -52,10 +53,12 @@ class PalapidasApplication(Adw.Application):
         GtkSource.init()
 
         self.dataManagement = DataManagement()
-        request_group = self.dataManagement.load()
 
-        self.cache_por_id = {}
+        env_group = self.dataManagement.load_envs()
+        self.envs_store = Gio.ListStore.new(EnvObject)
+        self.envs_store.splice(0, 0, additions=env_group)
 
+        request_group = self.dataManagement.load_requests()
         self.request_group_store = Gio.ListStore.new(RequestItem)
         self.request_group_store.splice(0, 0, additions=request_group.children)
         self.group_list_model = Gtk.TreeListModel.new(
@@ -85,8 +88,12 @@ class PalapidasApplication(Adw.Application):
         if item_type == "RequestGroup":
             return item.children
 
-    def on_save_request(self, _):
-        self.dataManagement.save(self.request_group_store)
+    def on_save(self, _: PalapidasWindow, type: str):
+        if type == "request":
+            self.dataManagement.save_requests(self.request_group_store)
+
+        if type == "env":
+            self.dataManagement.save_envs(self.envs_store)
 
     def do_activate(self):
         """Called when the application is activated.
@@ -98,9 +105,11 @@ class PalapidasApplication(Adw.Application):
         win = self.props.active_window
         if not win:
             win = PalapidasWindow(
-                application=self, group_list_model=self.group_list_model
+                application=self,
+                group_list_model=self.group_list_model,
+                envs_store=self.envs_store
             )
-            win.connect("save-requests", self.on_save_request)
+            win.connect("save-signal", self.on_save)
         win.present()
 
     def on_about_action(self, *args):
@@ -123,7 +132,7 @@ class PalapidasApplication(Adw.Application):
 
     def on_create(self, action: Gio.SimpleAction, target):
         action_name = action.get_name()
-
+        print(target)
         if action_name == "create-sub-folder":
             parent_item_id = target.unpack()
             DataManagement.add_item(
@@ -158,7 +167,7 @@ class PalapidasApplication(Adw.Application):
                 store=self.request_group_store, id=parent_item_id, new_name=new_name
             )
 
-        self.dataManagement.save(self.request_group_store)
+        self.dataManagement.save_requests(self.request_group_store)
 
     def create_action(self, name, callback, target=None, shortcuts=None):
         """Add an application action.

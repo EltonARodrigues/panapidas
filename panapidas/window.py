@@ -33,7 +33,7 @@ from panapidas.model.requests import Request
 class PalapidasWindow(Adw.ApplicationWindow):
     __gtype_name__ = "PalapidasWindow"
 
-    __gsignals__ = {"save-requests": (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())}
+    __gsignals__ = {"save-signal": (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (str,))}
 
     split_view = Gtk.Template.Child()
     page_navigation_view = Gtk.Template.Child()
@@ -44,8 +44,10 @@ class PalapidasWindow(Adw.ApplicationWindow):
     request_navigation = Gtk.Template.Child()
     save_request_button = Gtk.Template.Child()
 
-    def __init__(self, group_list_model: Gtk.TreeListModel, **kwargs):
+    def __init__(self, group_list_model: Gtk.TreeListModel, envs_store: Gio.ListStore, **kwargs):
         super().__init__(**kwargs)
+
+        self.env_layout.set_envs(envs_store)
 
         self.request_pages = {}
         self.save_request_button.set_visible(False)
@@ -61,11 +63,14 @@ class PalapidasWindow(Adw.ApplicationWindow):
 
         self.add_action(action)
 
+        self.env_config_layout.connect("env-saved", self.on_save, 'env')
+    
     def _on_open_envs(self, _action: Gio.SimpleAction, _target):
         self.page_navigation_view.push(self.env_layout)
 
     @Gtk.Template.Callback()
-    def on_env_selected(self, widget: EnvPage):
+    def on_env_selected(self, widget: EnvPage, env_object):
+        self.env_config_layout.set_env(env_object)
         self.page_navigation_view.push(self.env_config_layout)
 
     def on_request_selected(self, sidebar: RequestSidebar, request: Request):
@@ -77,8 +82,8 @@ class PalapidasWindow(Adw.ApplicationWindow):
         self.content_request.set_content(self.request_pages[request.id])
 
     @Gtk.Template.Callback()
-    def on_request_save(self, _):
-        self.emit("save-requests")
+    def on_save(self, _, type: str = "request"):
+        self.emit("save-signal", type)
 
     def _on_list_model_change(
         self, list_model: Gtk.TreeListModel, position: int, removed: int, added: int

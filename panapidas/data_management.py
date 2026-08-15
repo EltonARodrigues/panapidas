@@ -4,10 +4,12 @@ import json
 
 from gi.repository import GLib, GObject, Gio
 
-from panapidas.model.requests import RequestGroup, RequestItem, Request
+from panapidas.model.requests import RequestGroup, RequestItem
+from panapidas.model.env_object import EnvObject
 
 APPLICATION_NAME = "panapidas"
 APPLICATION_DATA_FILENAME = "requests.json"
+APPLICATION_ENVS_FILENAME = "envs.json"
 
 
 class DataManagement:
@@ -16,22 +18,56 @@ class DataManagement:
         self.data_dir = GLib.get_user_data_dir()
         self.app_dir = os.path.join(self.data_dir, APPLICATION_NAME)
         self.data_path = os.path.join(self.app_dir, APPLICATION_DATA_FILENAME)
+        self.env_path = os.path.join(self.app_dir, APPLICATION_ENVS_FILENAME)
+        print(self.data_path)
         self._request_group = None
 
-    def load(self) -> RequestGroup:
-        if not os.path.exists(self.data_path):
+    def _load(self, path: str) -> dict | None:
+        if not os.path.exists(path):
             print("Arquivo não encontrado. Retornando lista vazia.")
+            return None
+
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+
+    def load_requests(self) -> RequestGroup:
+        data = self._load(self.data_path)
+
+        if not data:
             return RequestGroup("ROOT", "", [])
 
-        with open(self.data_path, "r", encoding="utf-8") as f:
-            requests_dict = json.load(f)
-
         self._request_group = RequestGroup(
-            requests_dict["id"], requests_dict["name"], requests_dict["children"]
+            data["id"], data["name"], data["children"]
         )
         return self._request_group
 
-    def save(self, store: Gio.ListStore):
+    def load_envs(self) -> list[EnvObject]:
+        data = self._load(self.env_path)
+
+        if not data:
+            return []
+
+        env_list = [EnvObject(env["id"], env["name"], env["envs_map"]) for env in data["envs"]]
+        return env_list
+
+    def save_envs(self, envs_store):
+        os.makedirs(self.app_dir, exist_ok=True)
+
+        envs = [] 
+        for i in range(envs_store.get_n_items()):
+            objeto = envs_store.get_item(i)
+            envs.append(objeto.to_dict())
+
+        env_dict = {
+            "envs": envs
+        }
+        with open(self.env_path, "w", encoding="utf-8") as f:
+            json.dump(env_dict, f, indent=2, ensure_ascii=False)
+
+        print(f"Dados de envs salvos com sucesso em: {self.data_path}")
+    
+    def save_requests(self, store: Gio.ListStore):
         os.makedirs(self.app_dir, exist_ok=True)
 
         self._request_group.children = []

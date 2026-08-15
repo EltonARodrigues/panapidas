@@ -43,3 +43,4 @@ class MapEntry(GObject.Object):
             "key": self.key,
             "value": self.value,
         }
+

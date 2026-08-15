@@ -8,15 +8,15 @@ template $EnvConfigPage: Adw.NavigationPage {
     [top]
     Adw.HeaderBar {
       [end]
-      Button save_request_button {
-        // sensitive: false;
+      Button save_env_button {
+        sensitive: false;
         label: _("Save");
 
         styles [
           "suggested-action",
         ]
 
-        // clicked => $on_request_save();
+        clicked => $on_env_save();
       }
     }
 
@@ -31,7 +31,6 @@ template $EnvConfigPage: Adw.NavigationPage {
           selection-mode: none;
         }
       }
-
     };
   };
 }

@@ -22,8 +22,9 @@ template $EnvPage: Adw.NavigationPage {
           placeholder-text: _("Search Env");
         }
 
-        Button save_request_button {
+        Button add_env_button {
           // sensitive: false;
+          label: _("Add New Env");
           icon-name: "list-add-symbolic";
 
           styles [
@@ -42,12 +43,6 @@ template $EnvPage: Adw.NavigationPage {
       ListBox list_envs {
         hexpand: true;
         valign: start;
-        activate-on-single-click: true;
-        selection-mode: single;
-
-        styles [
-          "boxed-list",
-        ]
       }
     };
   };
