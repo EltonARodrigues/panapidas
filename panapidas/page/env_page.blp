@@ -2,7 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 
 template $EnvPage: Adw.NavigationPage {
-  title: _('Envs');
+  title: _("Envs");
 
   child: Adw.ToolbarView content_request {
     [top]
@@ -23,7 +23,6 @@ template $EnvPage: Adw.NavigationPage {
         }
 
         Button add_env_button {
-          // sensitive: false;
           label: _("Add New Env");
           icon-name: "list-add-symbolic";
 
@@ -31,19 +30,46 @@ template $EnvPage: Adw.NavigationPage {
             "suggested-action",
           ]
 
-          // clicked => $on_request_save();
+          clicked => $on_create_env();
         }
       }
     }
 
-    content: Box {
-      orientation: vertical;
-      spacing: 12;
+    content: ScrolledWindow {
+      has-frame: false;
+      margin-top: 10;
+      margin-bottom: 10;
+      margin-start: 10;
+      margin-end: 10;
 
-      ListBox list_envs {
-        hexpand: true;
-        valign: start;
-      }
-    };
+      child: ListView list_envs {
+        // hexpand: true;
+        // valign: start;
+        enable-rubberband: false;
+
+        styles [
+          "list-view-env",
+        ]
+
+        factory: SignalListItemFactory {
+          setup => $on_setup_factory();
+          bind => $on_bind_factory();
+          unbind => $on_unbind_factory();
+        };
+      };
+    }; 
   };
+}
+
+Adw.AlertDialog delete_env_dialog {
+  heading: _("Confirmation");
+  close-response: "cancel";
+  default-response: "delete";
+  body: _("Are you sure you want to delete this environment group?");
+  // signal response;
+
+  responses [
+    cancel: _("Cancel"),
+    delete: _("Delete") destructive,
+  ]
 }

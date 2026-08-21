@@ -38,7 +38,6 @@ class PalapidasWindow(Adw.ApplicationWindow):
     split_view = Gtk.Template.Child()
     page_navigation_view = Gtk.Template.Child()
     request_layout = Gtk.Template.Child()
-    env_layout = Gtk.Template.Child()
     env_config_layout = Gtk.Template.Child()
     content_request = Gtk.Template.Child()
     request_navigation = Gtk.Template.Child()
@@ -47,7 +46,12 @@ class PalapidasWindow(Adw.ApplicationWindow):
     def __init__(self, group_list_model: Gtk.TreeListModel, envs_store: Gio.ListStore, **kwargs):
         super().__init__(**kwargs)
 
-        self.env_layout.set_envs(envs_store)
+
+        self.env_layout = EnvPage(env_store=envs_store)
+        self.env_layout.connect("env-selected", self._on_env_selected)
+        self.env_layout.connect("env-saved", self.on_save, 'env')
+
+        self.env_config_layout.connect("env-saved", self.on_save, 'env')
 
         self.request_pages = {}
         self.save_request_button.set_visible(False)
@@ -62,14 +66,15 @@ class PalapidasWindow(Adw.ApplicationWindow):
         action.connect('activate', self._on_open_envs)
 
         self.add_action(action)
-
-        self.env_config_layout.connect("env-saved", self.on_save, 'env')
     
     def _on_open_envs(self, _action: Gio.SimpleAction, _target):
         self.page_navigation_view.push(self.env_layout)
 
     @Gtk.Template.Callback()
-    def on_env_selected(self, widget: EnvPage, env_object):
+    def on_save(self, _, type: str = "request"):
+        self.emit("save-signal", type)
+
+    def _on_env_selected(self, widget: EnvPage, env_object):
         self.env_config_layout.set_env(env_object)
         self.page_navigation_view.push(self.env_config_layout)
 
@@ -80,10 +85,6 @@ class PalapidasWindow(Adw.ApplicationWindow):
         self.request_navigation.set_title(request.name)
         self.save_request_button.set_visible(True)
         self.content_request.set_content(self.request_pages[request.id])
-
-    @Gtk.Template.Callback()
-    def on_save(self, _, type: str = "request"):
-        self.emit("save-signal", type)
 
     def _on_list_model_change(
         self, list_model: Gtk.TreeListModel, position: int, removed: int, added: int

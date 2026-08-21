@@ -23,6 +23,10 @@ class EnvObject(GObject.Object):
     def name(self) -> str:
         return self._name
 
+    @name.setter
+    def name(self, name: str):
+        self._name = name
+
     @staticmethod
     def map_builder(envs_map):
         return [
