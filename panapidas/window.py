@@ -22,6 +22,7 @@ import json
 
 from gi.repository import Adw, Gio, Gtk, GObject
 
+from panapidas.model.env_object import EnvObject
 from panapidas.widget.request_sidebar import RequestSidebar
 from panapidas.page.request_page import RequestPage
 from panapidas.page.env_page import EnvPage
@@ -37,6 +38,7 @@ class PalapidasWindow(Adw.ApplicationWindow):
 
     split_view = Gtk.Template.Child()
     page_navigation_view = Gtk.Template.Child()
+    env_group_dropdown = Gtk.Template.Child()
     request_layout = Gtk.Template.Child()
     env_config_layout = Gtk.Template.Child()
     content_request = Gtk.Template.Child()
@@ -45,6 +47,17 @@ class PalapidasWindow(Adw.ApplicationWindow):
 
     def __init__(self, group_list_model: Gtk.TreeListModel, envs_store: Gio.ListStore, **kwargs):
         super().__init__(**kwargs)
+
+        self.env_selected = None
+
+        self.env_group_dropdown.set_expression(
+            Gtk.ClosureExpression.new(
+                GObject.TYPE_STRING,
+                lambda item: item.name if item else "",
+                [],
+            )
+        )
+        self.env_group_dropdown.set_model(Gtk.SingleSelection.new(envs_store))
 
 
         self.env_layout = EnvPage(env_store=envs_store)
@@ -69,6 +82,11 @@ class PalapidasWindow(Adw.ApplicationWindow):
     
     def _on_open_envs(self, _action: Gio.SimpleAction, _target):
         self.page_navigation_view.push(self.env_layout)
+
+    @Gtk.Template.Callback()
+    def on_env_group_selected(self, _dropdown: Gtk.DropDown, env_group: EnvObject):
+        print(f"Selected env group: {env_group.name}")
+        self.env_selected = env_group;
 
     @Gtk.Template.Callback()
     def on_save(self, _, type: str = "request"):

@@ -16,7 +16,12 @@ template $PalapidasWindow: Adw.ApplicationWindow {
 
           Adw.ToolbarView content_request {
             [top]
-            Adw.HeaderBar {
+            Adw.HeaderBar content_header_bar {
+              [start]
+              DropDown env_group_dropdown {
+                notify::selected-item => $on_env_group_selected();
+              }
+
               [end]
               Button save_request_button {
                 // sensitive: false;
