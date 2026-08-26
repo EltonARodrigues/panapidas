@@ -13,7 +13,7 @@ class EnvObject(GObject.Object):
 
         self._id = str(uuid.uuid4()) if id is None else id
         self._name = name
-        self.envs = EnvObject.map_builder(envs_map)
+        self._envs = EnvObject.map_builder(envs_map)
 
     @GObject.Property(type=int)
     def id(self) -> int:
@@ -23,9 +23,17 @@ class EnvObject(GObject.Object):
     def name(self) -> str:
         return self._name
 
+    @GObject.Property()
+    def envs(self) -> str:
+        return self._envs
+
     @name.setter
     def name(self, name: str):
         self._name = name
+
+    @GObject.Property()
+    def dict_envs(self):
+        return  [env_map.to_dict() for env_map in self._envs]
 
     @staticmethod
     def map_builder(envs_map):
@@ -38,5 +46,5 @@ class EnvObject(GObject.Object):
         return {
             "id": self.id,
             "name": self.name,
-            "envs_map": [env_map.to_dict() for env_map in self.envs],
+            "envs_map": [env_map.to_dict() for env_map in self._envs],
         } 

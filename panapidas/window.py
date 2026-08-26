@@ -49,6 +49,7 @@ class PalapidasWindow(Adw.ApplicationWindow):
         super().__init__(**kwargs)
 
         self.env_selected = None
+        self.request_selected = None
 
         self.env_group_dropdown.set_expression(
             Gtk.ClosureExpression.new(
@@ -84,9 +85,12 @@ class PalapidasWindow(Adw.ApplicationWindow):
         self.page_navigation_view.push(self.env_layout)
 
     @Gtk.Template.Callback()
-    def on_env_group_selected(self, _dropdown: Gtk.DropDown, env_group: EnvObject):
-        print(f"Selected env group: {env_group.name}")
+    def on_env_group_selected(self, dropdown: Gtk.DropDown, _: GObject):
+        env_group = dropdown.get_selected_item()
         self.env_selected = env_group;
+
+        if self.request_selected:
+            self.request_selected.on_change_env(self.env_selected)
 
     @Gtk.Template.Callback()
     def on_save(self, _, type: str = "request"):
@@ -98,10 +102,11 @@ class PalapidasWindow(Adw.ApplicationWindow):
 
     def on_request_selected(self, sidebar: RequestSidebar, request: Request):
         if request.id not in self.request_pages:
-            self.request_pages[request.id] = RequestPage(request)
+            self.request_pages[request.id] = RequestPage(self.env_selected, request)
 
         self.request_navigation.set_title(request.name)
         self.save_request_button.set_visible(True)
+        self.request_selected = self.request_pages[request.id]
         self.content_request.set_content(self.request_pages[request.id])
 
     def _on_list_model_change(

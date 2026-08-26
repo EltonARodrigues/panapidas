@@ -18,14 +18,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import threading
-from concurrent.futures import ThreadPoolExecutor, Future
 
 from gi.repository import Adw, GLib, Gtk
 
 from panapidas.widget.map_list_menu import MapListMenu
 from panapidas.widget.body_source_view import BodySourceView
 from panapidas.request.http_request import request, Response
+from panapidas.model.env_object import EnvObject
 from panapidas.model.requests import Request
+from panapidas.utils.label_style import apply_env, apply_env_style
 
 
 @Gtk.Template(
@@ -48,10 +49,11 @@ class RequestPage(Adw.Bin):
     response_time_label = Gtk.Template.Child()
     response_size_label = Gtk.Template.Child()
 
-    def __init__(self, request: Request, **kwargs):
+    def __init__(self, env_object: EnvObject, request: Request, **kwargs):
         super().__init__(**kwargs)
 
         self.request = request
+        self.envs = env_object.dict_envs
 
         self.connect("destroy", self._on_page_destroy)
 
@@ -70,16 +72,16 @@ class RequestPage(Adw.Bin):
 
         self.url_entry.set_text(request.url or "")
 
-        self.headers = MapListMenu(self.request_header_list, request.headers)
+        self.headers = MapListMenu(self.request_header_list, request.headers, self.envs)
         self.headers.connect("map-changed", self._on_map_change, "headers")
 
-        self.params = MapListMenu(self.request_params_list, request.params)
+        self.params = MapListMenu(self.request_params_list, request.params, self.envs)
         self.params.connect("map-changed", self._on_map_change, "params")
 
         self.body_params_list = Gtk.ListBox(selection_mode=0)
 
         body_params_filter = request.body if type(request.body) == "list" else []
-        self.body_params = MapListMenu(self.body_params_list, body_params_filter)
+        self.body_params = MapListMenu(self.body_params_list, body_params_filter, self.envs)
 
         self.requestBodySourceView = BodySourceView()
         self.requestBodySourceView.set_hexpand(True)
@@ -91,6 +93,10 @@ class RequestPage(Adw.Bin):
         label_template_text = label.get_text()
         label.set_visible(True)
         label.set_text(label_template_text.format(text))
+
+    def on_change_env(self, env_group: EnvObject):
+        self.envs = env_group.dict_envs
+        self._load_request(self.request)
 
     def _render_response(self, response: Response) -> bool:
         self.default_status_bar_label.set_visible(False)
@@ -118,10 +124,10 @@ class RequestPage(Adw.Bin):
     def _call_request(self):
         body = self._get_request_body_text() if self.body_type == "raw" else None
         response = request(
-            url=self.url_entry.get_text(),
+            url=apply_env(self.envs, self.url_entry.get_text()),
             body=body,
-            params=self.body_params.get_dict(),
-            headers=self.headers.get_dict() or {},
+            params=self.body_params.get_formated_dict(),
+            headers=self.headers.get_formated_dict() or {},
             method=self.http_method_list.props.selected_item.get_string(),
             data_as_json=self.body_type == "raw",
             body_type=self.body_type,
@@ -190,4 +196,8 @@ class RequestPage(Adw.Bin):
 
     @Gtk.Template.Callback()
     def on_url_change(self, widget: Gtk.Entry):
-        self.request.url = widget.get_text()
+        text = widget.get_text()
+        self.request.url = text
+
+        apply_env_style(self.envs, text, widget)
+
