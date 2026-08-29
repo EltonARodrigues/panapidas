@@ -65,7 +65,7 @@ class DataManagement:
         with open(self.env_path, "w", encoding="utf-8") as f:
             json.dump(env_dict, f, indent=2, ensure_ascii=False)
 
-        print(f"Dados de envs salvos com sucesso em: {self.data_path}")
+        print(f"Dados de envs salvos com sucesso em: {self.env_path}")
     
     def save_requests(self, store: Gio.ListStore):
         os.makedirs(self.app_dir, exist_ok=True)

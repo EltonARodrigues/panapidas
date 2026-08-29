@@ -27,6 +27,10 @@ class EnvObject(GObject.Object):
     def envs(self) -> str:
         return self._envs
 
+    @envs.setter
+    def envs(self, envs_map_entry: list[MapEntry]) -> str:
+        self._envs = envs_map_entry
+
     @name.setter
     def name(self, name: str):
         self._name = name
