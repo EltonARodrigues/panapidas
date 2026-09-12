@@ -1,0 +1,31 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $PreferencesDialog: Adw.Dialog {
+        title: _("Preferences");
+        content-width: 960;
+        content-height: 770;
+        width-request: 360;
+        height-request: 150;
+    child: Adw.NavigationSplitView split_view {
+
+      sidebar: Adw.NavigationPage {
+
+        child: Adw.ToolbarView {
+          [top]
+          Adw.HeaderBar {
+            show-title: bind template.compact-sidebar inverted;
+          }
+
+          content: Adw.Sidebar sidebar {
+            // activated => $sidebar_activated_cb();
+            // notify::mode => $update_sidebar();
+
+            Adw.NavigationPage {
+              title: _("General");
+            }
+          };
+        };
+      };
+    };
+}

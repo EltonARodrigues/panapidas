@@ -31,6 +31,7 @@ gi.require_version("GtkSource", "5")
 
 from gi.repository import Gtk, Gio, Adw, GLib, GObject, GtkSource, Gdk
 
+from panapidas.page.preferences_page import PreferencesPage
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.model.env_object import EnvObject
 from panapidas.data_management import DataManagement
@@ -128,6 +129,8 @@ class PalapidasApplication(Adw.Application):
 
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
+        prefs_dialog = PreferencesPage()
+        prefs_dialog.present(self.props.active_window)
         print("app.preferences action activated")
 
     def on_create(self, action: Gio.SimpleAction, target):
