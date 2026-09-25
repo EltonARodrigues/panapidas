@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="panapidas">
-	<schema id="eltonarodrigues.org.codeberg.palapidas" path="/eltonarodrigues/org/codeberg/palapidas/">
+	<schema id="eltonarodrigues.org.codeberg.panapidas" path="/eltonarodrigues/org/codeberg/panapidas/">
+		<key name="general-request-timeout" type="i">
+			<default>13</default>
+			<summary>Request timeout in seconds</summary>
+		</key>
+		<key name="client-certificates" type="as">
+			<default>[]</default>
+			<summary>Lista de certificados do cliente</summary>
+		</key>
 	</schema>
 </schemalist>

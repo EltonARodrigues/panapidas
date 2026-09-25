@@ -1,4 +1,4 @@
-from gi.repository import Adw, Gtk
+from gi.repository import Adw, Gtk, Gio
 
 from panapidas.widget.add_certificate import AddCertificateDialog
 from panapidas.widget.map_list_menu import MapListMenu
@@ -11,10 +11,20 @@ from panapidas.model.env_object import EnvObject
 class PreferencesPage(Adw.PreferencesDialog):
     __gtype_name__ = "PreferencesPage"
 
+    request_timeout_row = Gtk.Template.Child()
     cert_list_box = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.settings = Gio.Settings.new("eltonarodrigues.org.codeberg.panapidas")
+
+        self.settings.bind(
+            "general-request-timeout",
+            self.request_timeout_row,
+            "value",
+            Gio.SettingsBindFlags.DEFAULT
+        )
 
     def _add_cert_row(self, certificate: dict) -> Adw.ExpanderRow:
         row = Adw.ExpanderRow(title=certificate["url"])
