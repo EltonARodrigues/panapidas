@@ -35,18 +35,18 @@ from panapidas.page.preferences.preferences_page import PreferencesPage
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.model.env_object import EnvObject
 from panapidas.data_management import DataManagement
-from panapidas.window import PalapidasWindow
+from panapidas.window import PanapidasWindow
 
 APPLICATION_NAME = "panapidas"
 APPLICATION_DATA_FILENAME = "requests.json"
 
 
-class PalapidasApplication(Adw.Application):
+class PanapidasApplication(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
         super().__init__(
-            application_id="eltonarodrigues.org.codeberg.palapidas",
+            application_id="eltonarodrigues.org.codeberg.panapidas",
             flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
             resource_base_path="/eltonarodrigues/org/codeberg/panapidas",
         )
@@ -89,7 +89,7 @@ class PalapidasApplication(Adw.Application):
         if item_type == "RequestGroup":
             return item.children
 
-    def on_save(self, _: PalapidasWindow, type: str):
+    def on_save(self, _: PanapidasWindow, type: str):
         if type == "request":
             self.dataManagement.save_requests(self.request_group_store)
 
@@ -105,7 +105,7 @@ class PalapidasApplication(Adw.Application):
 
         win = self.props.active_window
         if not win:
-            win = PalapidasWindow(
+            win = PanapidasWindow(
                 application=self,
                 group_list_model=self.group_list_model,
                 envs_store=self.envs_store
@@ -117,7 +117,7 @@ class PalapidasApplication(Adw.Application):
         """Callback for the app.about action."""
         about = Adw.AboutDialog(
             application_name=APPLICATION_NAME,
-            application_icon="eltonarodrigues.org.codeberg.palapidas",
+            application_icon="eltonarodrigues.org.codeberg.panapidas",
             developer_name="Elton de Andrade Rodrigues",
             version="0.1.0",
             # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
@@ -207,5 +207,5 @@ def load_css():
 def main(VERSION):
     """The application's entry point."""
     load_css()
-    app = PalapidasApplication()
+    app = PanapidasApplication()
     return app.run(sys.argv)

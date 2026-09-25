@@ -1,8 +1,8 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
-data/eltonarodrigues.org.codeberg.palapidas.desktop.in
-data/eltonarodrigues.org.codeberg.palapidas.metainfo.xml.in
-data/eltonarodrigues.org.codeberg.palapidas.gschema.xml
+data/eltonarodrigues.org.codeberg.panapidas.desktop.in
+data/eltonarodrigues.org.codeberg.panapidas.metainfo.xml.in
+data/eltonarodrigues.org.codeberg.panapidas.gschema.xml
 src/main.py
 src/window.py
 src/window.ui

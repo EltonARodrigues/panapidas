@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=panapidas
 Exec=panapidas
-Icon=eltonarodrigues.org.codeberg.palapidas
+Icon=eltonarodrigues.org.codeberg.panapidas
 Terminal=false
 Type=Application
 Categories=Utility;

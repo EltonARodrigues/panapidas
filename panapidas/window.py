@@ -31,8 +31,8 @@ from panapidas.model.requests import Request
 
 
 @Gtk.Template(resource_path="/eltonarodrigues/org/codeberg/panapidas/window.ui")
-class PalapidasWindow(Adw.ApplicationWindow):
-    __gtype_name__ = "PalapidasWindow"
+class PanapidasWindow(Adw.ApplicationWindow):
+    __gtype_name__ = "PanapidasWindow"
 
     __gsignals__ = {"save-signal": (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (str,))}
 
