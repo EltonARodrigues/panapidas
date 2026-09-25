@@ -31,7 +31,7 @@ gi.require_version("GtkSource", "5")
 
 from gi.repository import Gtk, Gio, Adw, GLib, GObject, GtkSource, Gdk
 
-from panapidas.page.preferences_page import PreferencesPage
+from panapidas.page.preferences.preferences_page import PreferencesPage
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.model.env_object import EnvObject
 from panapidas.data_management import DataManagement

@@ -1,0 +1,67 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $AddCertificateDialog: Adw.AlertDialog {
+  close-response: "cancel";
+  default-response: "save";
+
+  responses [
+    cancel: _("Cancel"),
+    save: _("Save") suggested,
+  ]
+
+  Box {
+    orientation: vertical;
+
+    Adw.EntryRow {
+      title: _("Certificate Url");
+
+      changed => $on_certificate_url_changed();
+    }
+
+    Adw.ActionRow crt_action_row {
+      title: _("CRT file");
+      subtitle: _("/exemple/cert.crt");
+      activatable-widget: crl_toggle;
+
+      [suffix]
+      ToggleButton crl_toggle {
+        icon-name: "list-add-symbolic";
+        valign: center;
+
+        clicked => $on_add_crt_path();
+
+      }
+    }
+
+    Adw.ActionRow key_action_row {
+      title: _("KEY file");
+      subtitle: "/exemple/cert.key";
+      activatable-widget: key_toggle;
+
+      [suffix]
+      ToggleButton key_toggle {
+        icon-name: "list-add-symbolic";
+        valign: center;
+
+        clicked => $on_add_key_path();
+      }
+    }
+
+    Adw.ActionRow pfx_action_row {
+      title: _("PFX file");
+      subtitle: "/exemple/cert.pfx";
+      activatable-widget: pfx_toggle;
+
+      [suffix]
+      ToggleButton pfx_toggle {
+        icon-name: "list-add-symbolic";
+        valign: center;
+
+        clicked => $on_add_pfx_path();
+      }
+    }
+  }
+
+
+}

@@ -1,31 +1,54 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $PreferencesDialog: Adw.Dialog {
-        title: _("Preferences");
-        content-width: 960;
-        content-height: 770;
-        width-request: 360;
-        height-request: 150;
-    child: Adw.NavigationSplitView split_view {
+template $PreferencesPage: Adw.PreferencesDialog {
+  content-width: 800;
+  content-height: 600;
+  title: _("Preferences");
 
-      sidebar: Adw.NavigationPage {
+  Adw.PreferencesPage general_page {
+    title: _("General");
+    icon-name: "preferences-system-symbolic";
 
-        child: Adw.ToolbarView {
-          [top]
-          Adw.HeaderBar {
-            show-title: bind template.compact-sidebar inverted;
-          }
+    Adw.PreferencesGroup {
+      title: _("Request Settings");
+      description: _("Configure the request settings for the application");
 
-          content: Adw.Sidebar sidebar {
-            // activated => $sidebar_activated_cb();
-            // notify::mode => $update_sidebar();
+      Adw.SpinRow {
+        title: _("Request Timeout");
+        subtitle: _("Increment or decrement request timeout");
+        climb-rate: 0.2;
 
-            Adw.NavigationPage {
-              title: _("General");
-            }
-          };
+        adjustment: Adjustment {
+          lower: 0;
+          upper: 100;
+          value: 10;
+          step-increment: 1;
         };
-      };
-    };
+      }
+    }
+  }
+
+  Adw.PreferencesPage {
+    title: _("Certificate");
+    icon-name: "application-certificate-symbolic";
+
+    Adw.PreferencesGroup {
+      title: _("Certificate Settings");
+      description: _("Add or remove certificates for secure connections");
+
+      [header-suffix]
+      Button {
+        halign: center;
+        valign: center;
+        icon-name: "value-increase-symbolic";
+
+        clicked => $on_add_certificate();
+      }
+      
+      ListBox cert_list_box {
+        selection-mode: none;
+      }
+    }
+  }
 }
