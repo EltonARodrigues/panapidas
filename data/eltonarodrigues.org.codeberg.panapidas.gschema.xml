@@ -5,9 +5,9 @@
 			<default>13</default>
 			<summary>Request timeout in seconds</summary>
 		</key>
-		<key name="client-certificates" type="as">
-			<default>[]</default>
-			<summary>Lista de certificados do cliente</summary>
+		<key name="client-certificates" type="s">
+			<default>"[]"</default>
+			<summary>Client Certificate list</summary>
 		</key>
 	</schema>
 </schemalist>

@@ -40,7 +40,7 @@ class AddCertificateDialog(Adw.AlertDialog):
         self, dialog: Gtk.FileDialog, result: Gio.AsyncResult, row: Adw.ActionRow, file_type: str
     ):
         file = dialog.open_finish(result)
-        path = file.get_path()
+        path = "file://" + file.get_path()
         row.set_subtitle(path)
         self.certificate[file_type] = path
         self._enable_save_button()
