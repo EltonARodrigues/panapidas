@@ -1,3 +1,4 @@
+import base64
 import uuid
 
 from gi.repository import Gio, GObject
@@ -42,6 +43,7 @@ class Request(RequestItem):
         headers: MapEntry = None,
         body=None,
         params: MapEntry = None,
+        scripts: dict[str, str] = None,
     ):
         super().__init__(name_atr=name)
         self._id = str(uuid.uuid4()) if id is None else id
@@ -50,10 +52,19 @@ class Request(RequestItem):
         self.headers = headers or []
         self.params = params or []
         self.body = body
+        self._scripts = scripts or {"pre_script": "", "pos_script": ""}
 
     @GObject.Property(type=str)
     def id(self) -> str:
         return self._id[0]
+
+    @GObject.Property()
+    def scripts(self) -> dict:
+        return Request.base64_to_script(self._scripts)
+
+    @scripts.setter
+    def scripts(self, value: dict):
+        self._scripts = value
 
     def to_dict(self) -> dict[str, any]:
         return {
@@ -64,6 +75,25 @@ class Request(RequestItem):
             "headers": [header.to_dict() for header in self.headers],
             "params": [param.to_dict() for param in self.params],
             "body": self.body,
+            "scripts": Request.script_to_base64(self._scripts),
+        }
+
+    @staticmethod
+    def script_to_base64(script_dict: dict[str, str]) -> dict[str, str]:
+        return {
+            "pre_script": base64.b64encode(
+                script_dict["pre_script"].encode("utf-8")
+            ).decode("utf-8"),
+            "pos_script": base64.b64encode(
+                script_dict["pos_script"].encode("utf-8")
+            ).decode("utf-8"),
+        }
+
+    @staticmethod
+    def base64_to_script(script_dict: dict[str, str]) -> dict[str, str]:
+        return {
+            "pre_script": base64.b64decode(script_dict["pre_script"]).decode("utf-8"),
+            "pos_script": base64.b64decode(script_dict["pos_script"]).decode("utf-8"),
         }
 
 
@@ -110,6 +140,7 @@ class RequestGroup(RequestItem):
                     headers=RequestGroup.build_map_entry(children["headers"]),
                     params=RequestGroup.build_map_entry(children["params"]),
                     body=children["body"],
+                    scripts=children["scripts"],
                 )
             )
 

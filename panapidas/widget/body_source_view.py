@@ -1,4 +1,4 @@
-from gi.repository import Gtk, GtkSource, Adw
+from gi.repository import Gtk, GtkSource, GObject, Adw
 
 
 @Gtk.Template(
@@ -9,20 +9,24 @@ class BodySourceView(GtkSource.View):
 
     buffer = Gtk.Template.Child()
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-        lang_manager = GtkSource.LanguageManager.get_default()
-        language = lang_manager.get_language("json")
-
-        if language:
-            self.buffer.set_language(language)
+        self.set_language("json")
 
         self.scheme_manager = GtkSource.StyleSchemeManager.get_default()
         self.style_manager = Adw.StyleManager.get_default()
         self.style_manager.connect("notify::dark", self.update_style)
 
         self.update_style()
+
+    def set_language(self, language_name: str):
+        lang_manager = GtkSource.LanguageManager.get_default()
+        language = lang_manager.get_language(language_name)
+
+        if language:
+            self.buffer.set_language(language)
+        
 
     def update_style(self):
         scheme = self.scheme_manager.get_scheme(

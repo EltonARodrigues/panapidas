@@ -175,6 +175,53 @@ template $RequestPage: Adw.Bin {
               }
             };
           }
+
+          Gtk.StackPage {
+            name: "Scripts";
+            title: _("Script");
+
+            child: Box {
+              orientation: vertical;
+
+              Adw.ToggleGroup script_type_toggle_group {
+                active-name: "pre";
+
+                styles [
+                  "toolbar",
+                  "body_toggle",
+                ]
+
+                notify::active-name => $on_script_type_change();
+
+                Adw.Toggle {
+                  name: "pre";
+                  label: _("Pre-request");
+                }
+
+                Adw.Toggle {
+                  name: "post";
+                  label: _("Post-request");
+                }
+              }
+
+              ScrolledWindow script_content {
+                min-content-height: 200;
+                max-content-height: 400;
+                hscrollbar-policy: never;
+                propagate-natural-height: true;
+                has-frame: false;
+                valign: start;
+
+                child: Box {
+                  orientation: vertical;
+                  margin-top: 5;
+                  margin-bottom: 5;
+
+                  $BodySourceView script_source_view {}
+                };
+              }
+            };
+          }
         }
       }
 

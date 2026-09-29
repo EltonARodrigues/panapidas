@@ -19,7 +19,7 @@
 
 import threading
 
-from gi.repository import Adw, GLib, Gtk
+from gi.repository import Adw, GLib, Gtk, GObject
 
 from panapidas.widget.map_list_menu import MapListMenu
 from panapidas.widget.body_source_view import BodySourceView
@@ -27,6 +27,7 @@ from panapidas.request.http_request import request, Response
 from panapidas.model.env_object import EnvObject
 from panapidas.model.requests import Request
 from panapidas.utils.label_style import apply_env, apply_env_style
+from panapidas.request.script_request import ScriptRequest
 
 
 @Gtk.Template(
@@ -48,6 +49,8 @@ class RequestPage(Adw.Bin):
     response_status_label = Gtk.Template.Child()
     response_time_label = Gtk.Template.Child()
     response_size_label = Gtk.Template.Child()
+    script_type_toggle_group = Gtk.Template.Child()
+    script_source_view = Gtk.Template.Child()
 
     def __init__(self, env_object: EnvObject, request: Request, **kwargs):
         super().__init__(**kwargs)
@@ -61,9 +64,17 @@ class RequestPage(Adw.Bin):
         self.is_destroyed = False
         self.stop_event = threading.Event()
 
+        self.body_type = None
+
+        self.script_source_view.set_language("js")
+
+        self.script_buffer = self.script_source_view.get_buffer()
+        self.script_buffer.connect("changed", self._on_script_buffer_changed)
+
+        self.script_runner = ScriptRequest(None, None, self.envs)
+
         self._load_request(request)
 
-        self.body_type = None
 
     def _load_request(self, request: Request):
         self.http_method_list.set_selected(
@@ -81,12 +92,18 @@ class RequestPage(Adw.Bin):
         self.body_params_list = Gtk.ListBox(selection_mode=0)
 
         body_params_filter = request.body if type(request.body) == "list" else []
-        self.body_params = MapListMenu(self.body_params_list, body_params_filter, self.envs)
+        self.body_params = MapListMenu(
+            self.body_params_list, body_params_filter, self.envs
+        )
 
         self.requestBodySourceView = BodySourceView()
         self.requestBodySourceView.set_hexpand(True)
         self.requestBodySourceView.set_halign(Gtk.Align.FILL)
         self.requestBodySourceView.set_size_request(-1, 500)
+
+        self.scripts = request.scripts
+        self.script_buffer.set_text(self.scripts["pre_script"])
+        
 
     @staticmethod
     def set_response_bar_label(label: Gtk.Label, text: str):
@@ -115,14 +132,20 @@ class RequestPage(Adw.Bin):
         buffer = self.response_body.get_buffer()
         buffer.set_text(response.body, -1)
 
+        self.script_runner.run(self.scripts["pos_script"])
+
         return False
 
-    def _get_request_body_text(self) -> str:
-        buffer = self.requestBodySourceView.get_buffer()
+    def _get_source_view_text(self, source_view: BodySourceView) -> str:
+        buffer = source_view.get_buffer()
         return buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
 
     def _call_request(self):
-        body = self._get_request_body_text() if self.body_type == "raw" else None
+        body = (
+            self._get_source_view_text(self.requestBodySourceView)
+            if self.body_type == "raw"
+            else None
+        )
         response = request(
             url=apply_env(self.envs, self.url_entry.get_text()),
             body=body,
@@ -155,8 +178,19 @@ class RequestPage(Adw.Bin):
             self.stop_event.set()
             self.active_request = False
 
+    def _on_script_buffer_changed(self, buffer: Gtk.TextBuffer):
+        text = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
+
+        if self.script_type_toggle_group.get_active_name() == "pre":
+            self.scripts["pre_script"] = text
+        else:
+            self.scripts["pos_script"] = text
+
+        self.request.scripts = self.scripts
+
     @Gtk.Template.Callback()
     def on_send(self, _):
+        self.script_runner.run(self.scripts["pre_script"])
         if self.is_destroyed or self.active_request:
             return None
 
@@ -177,7 +211,7 @@ class RequestPage(Adw.Bin):
             self.active_request = False
 
     @Gtk.Template.Callback()
-    def on_body_type_change(self, widget: Adw.ToggleGroup, active_name: str):
+    def on_body_type_change(self, widget: Adw.ToggleGroup, active_name: GObject.ParamSpec):
         self.body_type = widget.get_property(active_name.get_name())
 
         if self.body_type == "none":
@@ -190,6 +224,14 @@ class RequestPage(Adw.Bin):
             self.body_type_request.set_child(self.body_params_list)
 
     @Gtk.Template.Callback()
+    def on_script_type_change(self, widget: Adw.ToggleGroup, active_name: GObject.ParamSpec):
+        script_type = widget.get_property(active_name.get_name())
+        self.script_buffer.set_text(
+            self.scripts["pre_script"] if (script_type == "pre") else self.scripts["pos_script"],
+            -1,
+        )
+
+    @Gtk.Template.Callback()
     def on_method_change(self, widget: Gtk.DropDown, _):
         method = widget.props.selected_item.get_string()
         self.request.method = method
@@ -200,4 +242,3 @@ class RequestPage(Adw.Bin):
         self.request.url = text
 
         apply_env_style(self.envs, text, widget)
-
