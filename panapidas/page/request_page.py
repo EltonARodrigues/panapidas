@@ -71,9 +71,9 @@ class RequestPage(Adw.Bin):
         self.script_buffer = self.script_source_view.get_buffer()
         self.script_buffer.connect("changed", self._on_script_buffer_changed)
 
-        self.script_runner = ScriptRequest(None, None, self.envs)
+        self.script_runner = ScriptRequest(self.request, self.envs)
 
-        self._load_request(request)
+        self._load_request(self.request)
 
 
     def _load_request(self, request: Request):
@@ -132,7 +132,7 @@ class RequestPage(Adw.Bin):
         buffer = self.response_body.get_buffer()
         buffer.set_text(response.body, -1)
 
-        self.script_runner.run(self.scripts["pos_script"])
+        self.script_runner.run(self.scripts["pos_script"], response=response)
 
         return False
 

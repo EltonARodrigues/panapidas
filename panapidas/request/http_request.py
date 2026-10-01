@@ -10,6 +10,7 @@ from urllib.parse import urlencode
 
 
 class Response(typing.NamedTuple):
+    url: str
     body: str
     headers: str
     status: str
@@ -108,6 +109,7 @@ def request(
             body = body_bytes.get_data().decode("utf-8", errors="replace")
 
         return Response(
+            url=message.get_uri().to_string(),
             body=body,
             headers=response_headers,
             status=f"{status} {reason}",
@@ -118,6 +120,7 @@ def request(
     except GLib.Error as e:
         print(f"Connection failed. {e}")
         return Response(
+            url=None,
             body="Connection failed",
             headers=None,
             status=None,
