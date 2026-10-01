@@ -23,7 +23,6 @@
         "*.a"
     ],
     "modules": [
-        "python3-urllib3.json",
         "dukpy.json",
         {
             "name": "panapidas",

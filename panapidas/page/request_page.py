@@ -146,10 +146,11 @@ class RequestPage(Adw.Bin):
             if self.body_type == "raw"
             else None
         )
+
         response = request(
             url=apply_env(self.envs, self.url_entry.get_text()),
             body=body,
-            params=self.body_params.get_formated_dict(),
+            params=self.params.get_formated_dict(),
             headers=self.headers.get_formated_dict() or {},
             method=self.http_method_list.props.selected_item.get_string(),
             data_as_json=self.body_type == "raw",

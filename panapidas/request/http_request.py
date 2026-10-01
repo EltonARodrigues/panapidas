@@ -2,15 +2,17 @@ import json
 import time
 import typing
 
-import urllib3
+import gi
+gi.require_version("Soup", "3.0")
+from gi.repository import GLib, Soup
 
-from urllib.parse import urlencode, urlsplit
+from urllib.parse import urlencode
 
 
 class Response(typing.NamedTuple):
     body: str
     headers: str
-    status: int
+    status: str
     time_seconds: int = 0
     response_size: int = 0
 
@@ -42,105 +44,83 @@ class Response(typing.NamedTuple):
             self.response_size /= 1024.0
         return f"{self.response_size:.2f} TB"
 
-
 def request(
     body_type: str,
     url: str,
-    body: dict = None,
+    body: str = None,
     params: dict = None,
     headers: dict = None,
     method: str = "GET",
     data_as_json: bool = True,
-) -> Response:
-    print(type(headers))
+):
+    session = Soup.Session()
+    base = GLib.Uri.parse(url, GLib.UriFlags.NONE)
+
+    uri = GLib.Uri.build(
+        GLib.UriFlags.NONE,
+        base.get_scheme(),
+        base.get_userinfo(),
+        base.get_host(),
+        base.get_port(),
+        base.get_path(),
+        urlencode(params) if params else None,
+        base.get_fragment(),
+    )
+
+    message = Soup.Message.new(method, uri.to_string())
+
+    request_headers = message.get_request_headers()
+
+    if headers:
+        for chave, valor in headers.items():
+            request_headers.append(chave, valor)
+
     if body_type == "form_urlencoded":
-        headers["Content-Type"] = "application/x-www-form-urlencoded"
+        request_headers.append("Content-Type", "application/x-www-form-urlencoded")
 
     if body_type == "form_data":
-        headers["Content-Type"] = (
-            "multipart/form-data; boundary=<calculated when request is sent>"
-        )
+        request_headers.append("Content-Type", "multipart/form-data; boundary=<>")
 
     if data_as_json:
-        headers["Content-Type"] = "application/json"
+        request_headers.append("Content-Type", "application/json")
 
-    fields = None
-    if method in ["GET", "DELETED", "HEAD"] or body_type == "form_data":
-        fields = params
-
-    if params is not None and (
-        method in ["POST", "PUT"] or body_type == "form_urlencoded"
-    ):
-        print(params)
-        encoded_args = urlencode(params)
-        url = url + encoded_args
-
-    json_body = body if data_as_json else None
-
-    teste = {
-        "method": method,
-        "url": url,
-        "json": json_body,
-        "fields": fields,
-        "headers": headers,
-        "preload_content": False,
-    }
-    print(teste)
+    if body:
+        message.set_request_body_from_bytes(
+            request_headers.get_content_type()[0], GLib.Bytes.new(body.encode("utf-8"))
+        )
 
     try:
-        http = urllib3.PoolManager()
-
         time_start_count = time.perf_counter()
-        resp = http.request(
-            method=method,
-            url=urlsplit(url).geturl(),
-            json=json_body,
-            fields=fields,
-            headers=headers,
-            preload_content=False,
-        )
-        time_ttfb = time.perf_counter() - time_start_count
+        body_bytes = session.send_and_read(message, None)
+        time_ttfb = (time.perf_counter() - time_start_count) * 1000
 
-        dados = resp.read()
-        time_total = time.perf_counter() - time_start_count
-        resp.release_conn()
+        status = message.get_status()  # na 3.0 é get_status(), não status_code
+        reason = message.get_reason_phrase()
 
-        print(f"⏱️  TTFB (Server Processing + Network): {time_ttfb:.4f} segundos")
-        print(f"⏱️  Tempo Total (Usuário esperou):      {time_total:.4f} segundos")
-        print(
-            f"📦 Tempo gasto apenas baixando o JSON:  {time_total - time_ttfb:.4f} segundos"
+        response_headers = message.get_response_headers()
+        headers_dict = {}
+        response_headers.foreach(
+            lambda name, value, _: headers_dict.__setitem__(name, value), None
         )
+
+        body = ""
+        if body_bytes is not None:
+            body = body_bytes.get_data().decode("utf-8", errors="replace")
 
         return Response(
-            body=dados.decode("utf-8"),
-            headers=resp.headers,
-            status=resp.status,
+            body=body,
+            headers=response_headers,
+            status=f"{status} {reason}",
             time_seconds=time_ttfb,
-            response_size=len(dados),
+            response_size=len(body),
         )
 
-    except urllib3.exceptions.NewConnectionError:
-        print("Connection failed.")
-
-    except urllib3.exceptions.TimeoutError:
-        print("A API demorou muito. Tente novamente mais tarde.")
-        return None
-    except urllib3.exceptions.NewConnectionError:
-        print("Sem internet ou servidor inacessível.")
-
-    except ValueError as e:
+    except GLib.Error as e:
+        print(f"Connection failed. {e}")
         return Response(
-            body=str(e),
+            body="Connection failed",
             headers=None,
             status=None,
-            # time= time_ttfb,
-        )
-
-    except Exception as e:
-        print(e)
-        return Response(
-            body="",
-            headers=None,
-            status=None,
-            # time= time_ttfb,
+            time_seconds=None,
+            response_size=None,
         )
