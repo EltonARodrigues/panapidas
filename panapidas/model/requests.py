@@ -75,7 +75,7 @@ class Request(RequestItem):
             "headers": [header.to_dict() for header in self.headers],
             "params": [param.to_dict() for param in self.params],
             "body": self.body,
-            "scripts": Request.script_to_base64(self._scripts),
+            "scripts": self._scripts,
         }
 
     @staticmethod
