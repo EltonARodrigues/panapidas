@@ -77,9 +77,11 @@ class RequestPage(Adw.Bin):
 
 
     def _load_request(self, request: Request):
+        method = request.method or "GET"
         self.http_method_list.set_selected(
-            self.method_list.find(request.method or "GET")
+            self.method_list.find(method)
         )
+        self.http_method_list.set_css_classes(["toggle", f"method_{method.lower()}"])
 
         self.url_entry.set_text(request.url or "")
 
@@ -235,6 +237,8 @@ class RequestPage(Adw.Bin):
     @Gtk.Template.Callback()
     def on_method_change(self, widget: Gtk.DropDown, _):
         method = widget.props.selected_item.get_string()
+        if (self.request.method != method):
+            widget.set_css_classes(["toggle", f"method_{method.lower()}"])
         self.request.method = method
 
     @Gtk.Template.Callback()

@@ -48,11 +48,10 @@ class RequestSidebar(Adw.NavigationPage):
     def on_setup_factory(
         self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
     ):
-        label = Gtk.Label()
-        label.set_halign(Gtk.Align.START)
-
+        box = Gtk.Box()
+        box.set_css_classes(["test"])
         expander = Gtk.TreeExpander()
-        expander.set_child(label)
+        expander.set_child(box)
 
         list_item.set_child(expander)
 
@@ -61,7 +60,7 @@ class RequestSidebar(Adw.NavigationPage):
         self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
     ):
         expander = list_item.get_child()
-        label = expander.get_child()
+        box = expander.get_child()
 
         tree_row = list_item.get_item()
         expander.props.list_row = tree_row
@@ -74,10 +73,23 @@ class RequestSidebar(Adw.NavigationPage):
         gesture.connect("pressed", self.on_cell_right_click, expander, item)
         expander.add_controller(gesture)
 
+
+
+        method_class = ["method_pill"]
+        if hasattr(item, "method") and item.method is not None:
+            method_class.append(f"method_{item.method.lower()}")
+
+            method_box = Gtk.CenterBox()
+            method_box.set_css_classes(method_class)
+            method_box.set_center_widget(Gtk.Label(label=item.method))
+            box.append(method_box)
+
+        label = Gtk.Label(label=item.name)
+        box.append(label)
+
         list_item.changed_handler = item.connect(
             "notify::name", self._on_item_changed, label
         )
-        label.set_text(item.name)
 
     @Gtk.Template.Callback()
     def on_unbind_factory(self, _, list_item: Gtk.ListItem):
