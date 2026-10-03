@@ -2,6 +2,7 @@ import json
 
 import dukpy
 
+from panapidas.model.env_object import ActiveEnvs
 from panapidas.request.http_request import Response
 
 class PanapidasRequestObject():
@@ -63,25 +64,17 @@ class PanapidasResponseObject():
         return self.response.headers.get(key, "")
 
 class PanapidaObject:
-    def __init__(self, variables: dict[str, str] = None):
+    def __init__(self, variables: ActiveEnvs):
         self._variables = variables or {}
 
     def get(self, var_name: str):
-        for env in self._variables:
-            if env.get('key') == var_name:
-                return env.get('value')
-        return None
+        return self._variables.get_env(var_name)
 
     def set(self, var_name: str, value):
-        if self._variables is not None:
-            for env in self._variables:
-                if env.get('key') == var_name:
-                    env['value'] = value
-                    return
-            self._variables.append({'key': var_name, 'value': value})
+        self._variables.set_env(var_name, value)
 
 class ScriptRequest:
-    def __init__(self, request, variables):
+    def __init__(self, request, variables: ActiveEnvs):
         self.request = request
         self.pa = PanapidaObject(variables)
         self.request = PanapidasRequestObject(request)

@@ -22,7 +22,7 @@ import json
 
 from gi.repository import Adw, Gio, Gtk, GObject
 
-from panapidas.model.env_object import EnvObject
+from panapidas.model.env_object import EnvObject, ActiveEnvs
 from panapidas.widget.request_sidebar import RequestSidebar
 from panapidas.page.request_page import RequestPage
 from panapidas.page.env_page import EnvPage
@@ -58,6 +58,9 @@ class PanapidasWindow(Adw.ApplicationWindow):
                 [],
             )
         )
+
+        self.activeEnv = ActiveEnvs()
+
         self.env_group_dropdown.set_model(Gtk.SingleSelection.new(envs_store))
 
 
@@ -87,6 +90,7 @@ class PanapidasWindow(Adw.ApplicationWindow):
     @Gtk.Template.Callback()
     def on_env_group_selected(self, dropdown: Gtk.DropDown, _: GObject):
         env_group = dropdown.get_selected_item()
+        self.activeEnv.initialize(env_group.id, env_group.name, env_group.envs)
         self.env_selected = env_group;
 
         if self.request_selected:
@@ -102,7 +106,7 @@ class PanapidasWindow(Adw.ApplicationWindow):
 
     def on_request_selected(self, sidebar: RequestSidebar, request: Request):
         if request.id not in self.request_pages:
-            self.request_pages[request.id] = RequestPage(self.env_selected, request)
+            self.request_pages[request.id] = RequestPage(request)
 
         self.request_navigation.set_title(request.name)
         self.save_request_button.set_visible(True)

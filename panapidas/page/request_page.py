@@ -21,10 +21,11 @@ import threading
 
 from gi.repository import Adw, GLib, Gtk, GObject
 
+from panapidas.model import env_object
 from panapidas.widget.map_list_menu import MapListMenu
 from panapidas.widget.body_source_view import BodySourceView
 from panapidas.request.http_request import request, Response
-from panapidas.model.env_object import EnvObject
+from panapidas.model.env_object import ActiveEnvs, EnvObject
 from panapidas.model.requests import Request
 from panapidas.utils.label_style import apply_env, apply_env_style
 from panapidas.request.script_request import ScriptRequest
@@ -52,11 +53,14 @@ class RequestPage(Adw.Bin):
     script_type_toggle_group = Gtk.Template.Child()
     script_source_view = Gtk.Template.Child()
 
-    def __init__(self, env_object: EnvObject, request: Request, **kwargs):
+    def __init__(self, request: Request, **kwargs):
         super().__init__(**kwargs)
 
         self.request = request
-        self.envs = env_object.dict_envs
+
+        self.activeEnv = ActiveEnvs()
+        self.activeEnv.connect("env-changed", self.on_change_env)
+        self.envs = self.activeEnv.dict_envs
 
         self.connect("destroy", self._on_page_destroy)
 
@@ -71,7 +75,7 @@ class RequestPage(Adw.Bin):
         self.script_buffer = self.script_source_view.get_buffer()
         self.script_buffer.connect("changed", self._on_script_buffer_changed)
 
-        self.script_runner = ScriptRequest(self.request, self.envs)
+        self.script_runner = ScriptRequest(self.request, self.activeEnv)
 
         self._load_request(self.request)
 

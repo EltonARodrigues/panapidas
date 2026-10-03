@@ -64,7 +64,7 @@ class Request(RequestItem):
 
     @scripts.setter
     def scripts(self, value: dict):
-        self._scripts = value
+        self._scripts = Request.script_to_base64(value)
 
     def to_dict(self) -> dict[str, any]:
         return {

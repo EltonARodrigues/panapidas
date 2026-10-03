@@ -1,7 +1,7 @@
 from gi.repository import Adw, Gtk, GObject
 
 from panapidas.widget.map_list_menu import MapListMenu
-from panapidas.model.env_object import EnvObject
+from panapidas.model.env_object import ActiveEnvs, EnvObject
 
 
 @Gtk.Template(
@@ -34,4 +34,9 @@ class EnvConfigPage(Adw.NavigationPage):
 
     @Gtk.Template.Callback()
     def on_env_save(self, _: Gtk.Button):
+        active_envs = ActiveEnvs()
+        if active_envs.id == self.env_object.id:
+            active_envs.initialize(
+                self.env_object.id, self.env_object.name, self.env_object.envs
+            )
         self.emit("env-saved")
