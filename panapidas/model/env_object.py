@@ -90,7 +90,7 @@ class ActiveEnvs(EnvObject):
                 env.value = value
                 break
         else:
-            self._envs.append(MapEntry(key=key, value=value))
+            self._envs.append(MapEntry(id=str(uuid.uuid4()), key=key, value=value))
         self.emit("env-changed")
 
     def get_env(self, key: str) -> str | None:

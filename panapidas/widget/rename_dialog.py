@@ -11,7 +11,7 @@ class RenameDialog(Adw.AlertDialog):
 
     def __init__(self, heading: str, body: str, name: str, **kwargs):
         super().__init__(heading=heading, body=body, **kwargs)
-        self.rename_entry.set_text(name)
+        self.rename_entry.set_text(name or "")
         self.new_name = name
 
     def get_new_name(self) -> str:

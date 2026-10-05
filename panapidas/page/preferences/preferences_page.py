@@ -3,8 +3,6 @@ import json
 from gi.repository import Adw, Gtk, Gio
 
 from panapidas.widget.add_certificate import AddCertificateDialog
-from panapidas.widget.map_list_menu import MapListMenu
-from panapidas.model.env_object import EnvObject
 
 
 @Gtk.Template(

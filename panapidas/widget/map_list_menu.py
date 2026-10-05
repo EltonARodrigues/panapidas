@@ -20,7 +20,7 @@
 from gi.repository import Adw, Gtk, GObject, Gio
 
 from panapidas.model.map_entry import MapEntry
-from panapidas.utils.label_style import apply_env, apply_env_style
+from panapidas.utils.entry_env_formatter import apply_env, apply_env_style, entry_env_change_gesture
 
 
 class MapListMenu(GObject.Object):
@@ -28,10 +28,11 @@ class MapListMenu(GObject.Object):
 
     __gsignals__ = {"map-changed": (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())}
 
-    def __init__(self, list_box: Gtk.ListBox, items: list[MapEntry] = [], envs=None):
+    def __init__(self, list_box: Gtk.ListBox, items: list[MapEntry] = [], envs=None, map_env_template: bool = False):
         super().__init__()
 
         self.envs = envs
+        self.map_env_template = map_env_template
 
         self.items = items.copy()
         self.items.append(MapEntry(id=len(self.items) + 1, key="", value=""))
@@ -76,7 +77,8 @@ class MapListMenu(GObject.Object):
         if entry_type == "value":
             list_model.value = text_value
 
-        apply_env_style(self.envs, text_value, entry)
+        if self.map_env_template:
+            apply_env_style(self.envs, text_value, entry)
 
         self._on_map_change()
 
@@ -92,13 +94,17 @@ class MapListMenu(GObject.Object):
         linked_box.set_css_classes(["linked"])
 
         key_entry = Gtk.Entry(hexpand=True, placeholder_text="Key", text=model.key)
-        apply_env_style(self.envs, model.key, key_entry)
+        if self.map_env_template:
+            apply_env_style(self.envs, model.key, key_entry)
+            entry_env_change_gesture(key_entry)
         key_entry.connect("changed", self._on_entry_changed, "key", model)
 
         value_entry = Gtk.Entry(
             hexpand=True, placeholder_text="Value", text=model.value
         )
-        apply_env_style(self.envs, model.value, value_entry)
+        if self.map_env_template:
+            apply_env_style(self.envs, model.value, value_entry)
+            entry_env_change_gesture(value_entry)
         value_entry.connect("changed", self._on_entry_changed, "value", model)
 
         close_button = Gtk.Button(

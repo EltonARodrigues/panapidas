@@ -19,7 +19,7 @@
 
 import threading
 
-from gi.repository import Adw, GLib, Gtk, GObject
+from gi.repository import Adw, GLib, Gtk, GObject, Pango
 
 from panapidas.model import env_object
 from panapidas.widget.map_list_menu import MapListMenu
@@ -27,7 +27,7 @@ from panapidas.widget.body_source_view import BodySourceView
 from panapidas.request.http_request import request, Response
 from panapidas.model.env_object import ActiveEnvs, EnvObject
 from panapidas.model.requests import Request
-from panapidas.utils.label_style import apply_env, apply_env_style
+from panapidas.utils.entry_env_formatter import apply_env, apply_env_style, entry_env_change_gesture
 from panapidas.request.script_request import ScriptRequest
 
 
@@ -57,6 +57,8 @@ class RequestPage(Adw.Bin):
         super().__init__(**kwargs)
 
         self.request = request
+
+        entry_env_change_gesture(self.url_entry)
 
         self.activeEnv = ActiveEnvs()
         self.activeEnv.connect("env-changed", self.on_change_env)
@@ -89,10 +91,10 @@ class RequestPage(Adw.Bin):
 
         self.url_entry.set_text(request.url or "")
 
-        self.headers = MapListMenu(self.request_header_list, request.headers, self.envs)
+        self.headers = MapListMenu(self.request_header_list, request.headers, self.envs, True)
         self.headers.connect("map-changed", self._on_map_change, "headers")
 
-        self.params = MapListMenu(self.request_params_list, request.params, self.envs)
+        self.params = MapListMenu(self.request_params_list, request.params, self.envs, True)
         self.params.connect("map-changed", self._on_map_change, "params")
 
         self.body_params_list = Gtk.ListBox(selection_mode=0)
