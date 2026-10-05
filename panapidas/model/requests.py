@@ -48,7 +48,7 @@ class Request(RequestItem):
         super().__init__(name_atr=name)
         self._id = str(uuid.uuid4()) if id is None else id
         self.url = url
-        self.method = method
+        self.method = method or "GET"
         self.headers = headers or []
         self.params = params or []
         self.body = body

@@ -1,4 +1,4 @@
-from gi.repository import Gtk, Gio, Adw, GObject, Gdk, GLib
+from gi.repository import Gtk, Gio, Adw, GObject, GLib, Pango
 
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.widget.item_popover import ItemPopover
@@ -38,18 +38,17 @@ class RequestSidebar(Adw.NavigationPage):
 
         self.target_item = None
 
-        self.selection = Gtk.SingleSelection.new(group_list_model)
+        self.selection = Gtk.SingleSelection.new()
+        self.selection.set_autoselect(False)
         self.selection.connect("notify::selected", self.on_selected)
+        self.selection.set_model(group_list_model)
         self.request_view.set_model(self.selection)
-
-        self.selected = None
 
     @Gtk.Template.Callback()
     def on_setup_factory(
         self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
     ):
         box = Gtk.Box()
-        box.set_css_classes(["test"])
         expander = Gtk.TreeExpander()
         expander.set_child(box)
 
@@ -73,10 +72,10 @@ class RequestSidebar(Adw.NavigationPage):
         gesture.connect("pressed", self.on_cell_right_click, expander, item)
         expander.add_controller(gesture)
 
-
-
         method_class = ["method_pill"]
         if hasattr(item, "method") and item.method is not None:
+            expander.set_indent_for_icon(False)
+
             method_class.append(f"method_{item.method.lower()}")
 
             method_box = Gtk.CenterBox()
@@ -85,6 +84,8 @@ class RequestSidebar(Adw.NavigationPage):
             box.append(method_box)
 
         label = Gtk.Label(label=item.name)
+        label.set_max_width_chars(20)
+        label.set_ellipsize(Pango.EllipsizeMode.END)
         box.append(label)
 
         list_item.changed_handler = item.connect(
@@ -132,12 +133,12 @@ class RequestSidebar(Adw.NavigationPage):
         self.rename_popover.show()
 
     def on_selected(self, selection: Gtk.SingleSelection, _):
-        self.selected = selection.get_selected_item()
+        selected = selection.get_selected_item()
 
-        if not self.selected:
+        if not selected:
             return None
 
-        item = self.selected.get_item()
+        item = selected.get_item()
         item_type = GObject.type_name(item.__gtype__)
 
         if item_type == "RequestGroup":
