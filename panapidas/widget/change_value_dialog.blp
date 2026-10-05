@@ -1,0 +1,18 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $ChangeValueDialog: Adw.AlertDialog {
+  close-response: "cancel";
+  default-response: "save";
+
+  responses [
+    cancel: _("Cancel"),
+    save: _("Apply") suggested,
+  ]
+
+  Entry value_entry {
+    placeholder-text: _("Enter new value");
+    
+    changed => $on_change_value();
+  }
+}

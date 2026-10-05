@@ -15,7 +15,7 @@ blueprints = custom_target('blueprints',
     'widget/item_popover.blp',
     'widget/rename_popover.blp',
     'widget/body_source_view.blp',
-    'widget/rename_dialog.blp',
+    'widget/change_value_dialog.blp',
   ),
   output: '.',
   command: [

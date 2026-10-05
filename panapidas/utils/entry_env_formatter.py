@@ -5,7 +5,7 @@ import re
 from gi.repository import Gtk, Pango
 
 from panapidas.model.env_object import ActiveEnvs
-from panapidas.widget.rename_dialog import RenameDialog
+from panapidas.widget.change_value_dialog import ChangeValueDialog
 
 
 VARIABLE_PATTERN = r"\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}"
@@ -92,20 +92,20 @@ def on_entry_clicked(gesture, n_press, x, y, entry):
     env_key = find_match_at(text, index)
 
     if(env_key):
-        _on_change_env_key(env_key)
+        _on_change_env_key(env_key, entry.get_root())
 
-def _on_change_env_key(key: str):
+def _on_change_env_key(key: str, root_widget: Gtk.Widget = None):
     active_env = ActiveEnvs()
-    env_value_dialog = RenameDialog(
-        name=active_env.get_env(key),
+    env_value_dialog = ChangeValueDialog(
+        value=active_env.get_env(key),
         heading=f"Environment Variable: {key}",
         body=None,
     )
     env_value_dialog.connect("response", _on_env_value_changed, active_env, key)
-    env_value_dialog.present()
+    env_value_dialog.present(root_widget)
 
-def _on_env_value_changed(widget: RenameDialog, response_name: str, active_env: ActiveEnvs, key: str):
+def _on_env_value_changed(widget: ChangeValueDialog, response_name: str, active_env: ActiveEnvs, key: str):
     if response_name != "save":
         return
 
-    active_env.set_env(key, widget.get_new_name())
+    active_env.set_env(key, widget.get_value())

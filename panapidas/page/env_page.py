@@ -1,7 +1,7 @@
 from gi.repository import Adw, Gtk, GObject, Gio
 
 from panapidas.model.env_object import EnvObject
-from panapidas.widget.rename_dialog import RenameDialog
+from panapidas.widget.change_value_dialog import ChangeValueDialog
 
 MOUSE_CLICK = 1
 
@@ -143,7 +143,7 @@ class EnvPage(Adw.NavigationPage):
         self.delete_env_dialog.present()
 
     def _on_rename_requested(
-        self, widget: RenameDialog, response_name: str, env_object: EnvObject
+        self, widget: ChangeValueDialog, response_name: str, env_object: EnvObject
     ):
         if response_name != "save":
             return
@@ -159,13 +159,13 @@ class EnvPage(Adw.NavigationPage):
         self.emit("env-saved")
 
     def _on_rename_env(self, widget: Gtk.Button, env_object: EnvObject):
-        dialog = RenameDialog(
-            name=env_object.name,
+        dialog = ChangeValueDialog(
+            value=env_object.name,
             heading="Rename Environment",
             body="Change the name of the environment group.",
         )
         dialog.connect("response", self._on_rename_requested, env_object)
-        dialog.present()
+        dialog.present(self)
 
     def _on_select_env(
         self,
