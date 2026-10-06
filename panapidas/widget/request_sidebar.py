@@ -84,6 +84,7 @@ class RequestSidebar(Adw.NavigationPage):
             box.append(method_box)
 
         label = Gtk.Label(label=item.name)
+        label.set_tooltip_text(item.name)
         label.set_max_width_chars(20)
         label.set_ellipsize(Pango.EllipsizeMode.END)
         box.append(label)
@@ -109,6 +110,7 @@ class RequestSidebar(Adw.NavigationPage):
     def _on_item_changed(self, item: RequestItem, _, label: Gtk.Label):
         self.on_selected(self.selection, None)
         label.set_text(item.name)
+        label.set_tooltip_text(item.name)
 
     def on_cell_right_click(
         self,
