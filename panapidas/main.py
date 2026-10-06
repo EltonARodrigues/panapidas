@@ -37,7 +37,7 @@ from panapidas.model.env_object import EnvObject
 from panapidas.data_management import DataManagement
 from panapidas.window import PanapidasWindow
 
-APPLICATION_NAME = "panapidas"
+APPLICATION_NAME = "Panapidas"
 APPLICATION_DATA_FILENAME = "requests.json"
 
 
