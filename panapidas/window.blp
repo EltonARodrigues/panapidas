@@ -7,38 +7,42 @@ template $PanapidasWindow: Adw.ApplicationWindow {
   default-height: 600;
 
   content: Adw.NavigationSplitView split_view {
-    content: Adw.NavigationPage request_navigation {
+    content: 
+    
+    Adw.NavigationPage request_navigation {
       title: _("Request");
 
-      child: Adw.NavigationView page_navigation_view {
-        Adw.NavigationPage request_layout {
-          title: _("Requests");
+      child: Adw.ToastOverlay toast_overlay_status {
+        child: Adw.NavigationView page_navigation_view {
+          Adw.NavigationPage request_layout {
+            title: _("Requests");
 
-          Adw.ToolbarView content_request {
-            [top]
-            Adw.HeaderBar content_header_bar {
-              [start]
-              DropDown env_group_dropdown {
-                notify::selected-item => $on_env_group_selected();
-              }
+            Adw.ToolbarView content_request {
+              [top]
+              Adw.HeaderBar content_header_bar {
+                [start]
+                DropDown env_group_dropdown {
+                  notify::selected-item => $on_env_group_selected();
+                }
 
-              [end]
-              Button save_request_button {
-                // sensitive: false;
-                label: _("Save");
+                [end]
+                Button save_request_button {
+                  // sensitive: false;
+                  label: _("Save");
 
-                styles [
-                  "suggested-action",
-                ]
+                  styles [
+                    "suggested-action",
+                  ]
 
-                clicked => $on_save();
+                  clicked => $on_save();
+                }
               }
             }
           }
-        }
 
-        $EnvConfigPage env_config_layout {
-        }
+          $EnvConfigPage env_config_layout {
+          }
+        };
       };
     };
   };

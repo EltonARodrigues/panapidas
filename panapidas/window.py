@@ -44,6 +44,7 @@ class PanapidasWindow(Adw.ApplicationWindow):
     content_request = Gtk.Template.Child()
     request_navigation = Gtk.Template.Child()
     save_request_button = Gtk.Template.Child()
+    toast_overlay_status = Gtk.Template.Child()
 
     def __init__(self, group_list_model: Gtk.TreeListModel, envs_store: Gio.ListStore, **kwargs):
         super().__init__(**kwargs)
@@ -99,6 +100,11 @@ class PanapidasWindow(Adw.ApplicationWindow):
     @Gtk.Template.Callback()
     def on_save(self, _, type: str = "request"):
         self.emit("save-signal", type)
+
+    def show_toast(self, msg: str):
+        toast = Adw.Toast.new(msg)
+        toast.set_timeout(2)
+        self.toast_overlay_status.add_toast(toast)
 
     def _on_env_selected(self, widget: EnvPage, env_object):
         self.env_config_layout.set_env(env_object)

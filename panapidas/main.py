@@ -89,12 +89,14 @@ class PanapidasApplication(Adw.Application):
         if item_type == "RequestGroup":
             return item.children
 
-    def on_save(self, _: PanapidasWindow, type: str):
+    def on_save(self, _: PanapidasWindow, type: str, send_notification):
         if type == "request":
             self.dataManagement.save_requests(self.request_group_store)
+            send_notification("Request saved!")
 
         if type == "env":
             self.dataManagement.save_envs(self.envs_store)
+            send_notification("Environment saved!")
 
     def do_activate(self):
         """Called when the application is activated.
@@ -110,7 +112,7 @@ class PanapidasApplication(Adw.Application):
                 group_list_model=self.group_list_model,
                 envs_store=self.envs_store
             )
-            win.connect("save-signal", self.on_save)
+            win.connect("save-signal", self.on_save, win.show_toast)
         win.present()
 
     def on_about_action(self, *args):
