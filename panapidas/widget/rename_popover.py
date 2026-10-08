@@ -31,3 +31,7 @@ class RenamePopover(Gtk.Popover):
         new_name = GLib.Variant.new_string(self._rename)
         target = GLib.Variant.new_tuple(item_id, new_name)
         self.save_new_name.set_action_target_value(target)
+
+    @Gtk.Template.Callback()
+    def on_save_name(self, _widget: Gtk.Button):
+        self.popdown()
