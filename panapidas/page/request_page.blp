@@ -273,7 +273,9 @@ template $RequestPage: Adw.Bin {
           "textview",
         ]
 
-        $BodySourceView response_body {}
+        $BodySourceView response_body {
+          editable: false;
+        }
       }
     }
   };
