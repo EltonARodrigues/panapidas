@@ -98,6 +98,7 @@ class RequestPage(Adw.Bin):
         self.params.connect("map-changed", self._on_map_change, "params")
 
         self.body_params_list = Gtk.ListBox(selection_mode=0)
+        self.body_params_list.set_css_classes(["custom_list"])
 
         body_params_filter = request.body if type(request.body) == "list" else []
         self.body_params = MapListMenu(

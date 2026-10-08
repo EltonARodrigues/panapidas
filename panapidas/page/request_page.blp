@@ -101,6 +101,11 @@ template $RequestPage: Adw.Bin {
                 valign: start;
 
                 Gtk.ListBox request_params_list {
+
+                  styles [
+                    "custom_list"
+                  ]
+
                   selection-mode: none;
                 }
               }
@@ -122,6 +127,11 @@ template $RequestPage: Adw.Bin {
                 valign: start;
 
                 Gtk.ListBox request_header_list {
+
+                  styles [
+                    "custom_list"
+                  ]
+
                   selection-mode: none;
                 }
               }
@@ -140,7 +150,7 @@ template $RequestPage: Adw.Bin {
 
                 styles [
                   "toolbar",
-                  "body_toggle",
+                  "custom_list",
                 ]
 
                 notify::active-name => $on_body_type_change();
@@ -188,7 +198,7 @@ template $RequestPage: Adw.Bin {
 
                 styles [
                   "toolbar",
-                  "body_toggle",
+                  "custom_list",
                 ]
 
                 notify::active-name => $on_script_type_change();
