@@ -155,7 +155,7 @@ class EnvPage(Adw.NavigationPage):
             return
 
         env_group = self.env_store.get_item(position)
-        env_group.name = widget.get_new_name()
+        env_group.name = widget.get_value()
         self.emit("env-saved")
 
     def _on_rename_env(self, widget: Gtk.Button, env_object: EnvObject):
