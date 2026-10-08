@@ -60,16 +60,3 @@ template $EnvPage: Adw.NavigationPage {
     }; 
   };
 }
-
-Adw.AlertDialog delete_env_dialog {
-  heading: _("Confirmation");
-  close-response: "cancel";
-  default-response: "delete";
-  body: _("Are you sure you want to delete this environment group?");
-  // signal response;
-
-  responses [
-    cancel: _("Cancel"),
-    delete: _("Delete") destructive,
-  ]
-}

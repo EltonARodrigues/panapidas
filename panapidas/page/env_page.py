@@ -2,6 +2,7 @@ from gi.repository import Adw, Gtk, GObject, Gio
 
 from panapidas.model.env_object import EnvObject
 from panapidas.widget.change_value_dialog import ChangeValueDialog
+from panapidas.widget.delete_dialog import DeleteDialog
 
 MOUSE_CLICK = 1
 
@@ -16,10 +17,11 @@ class EnvPage(Adw.NavigationPage):
     }
 
     list_envs = Gtk.Template.Child()
-    delete_env_dialog = Gtk.Template.Child()
 
     def __init__(self, env_store: Gio.ListStore = None, **kwargs):
         super().__init__(**kwargs)
+
+        self.delete_env_dialog = DeleteDialog("Are you sure you want to delete this environment group?")
 
         self.delete_env_dialog.signal_id = self.delete_env_dialog.connect(
             "response", self._on_deleted_row
@@ -140,7 +142,7 @@ class EnvPage(Adw.NavigationPage):
 
     def _on_delete_row(self, widget: Gtk.Button, env_object: EnvObject):
         self.delete_env_dialog.object = env_object
-        self.delete_env_dialog.present()
+        self.delete_env_dialog.present(self)
 
     def _on_rename_requested(
         self, widget: ChangeValueDialog, response_name: str, env_object: EnvObject

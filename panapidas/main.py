@@ -32,6 +32,7 @@ gi.require_version("GtkSource", "5")
 from gi.repository import Gtk, Gio, Adw, GLib, GObject, GtkSource, Gdk
 
 from panapidas.page.preferences.preferences_page import PreferencesPage
+from panapidas.widget.delete_dialog import DeleteDialog
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.model.env_object import EnvObject
 from panapidas.data_management import DataManagement
@@ -77,12 +78,14 @@ class PanapidasApplication(Adw.Application):
         self.create_action(
             "create-sub-request", self.on_create, GLib.VariantType.new("s")
         )
-        self.create_action("delete-item", self.on_create, GLib.VariantType.new("s"))
+        self.create_action("delete-item", self.on_delete, GLib.VariantType.new("s"))
         self.create_action(
             "rename-item",
-            self.on_create,
+            self.on_rename,
             GLib.VariantType.new_tuple([GLib.VariantType("s"), GLib.VariantType("s")]),
         )
+
+        self.win = None
 
     def create_child_model(self, item):
         item_type = GObject.type_name(item.__gtype__)
@@ -107,13 +110,13 @@ class PanapidasApplication(Adw.Application):
 
         win = self.props.active_window
         if not win:
-            win = PanapidasWindow(
+            self.win = PanapidasWindow(
                 application=self,
                 group_list_model=self.group_list_model,
-                envs_store=self.envs_store
+                envs_store=self.envs_store,
             )
-            win.connect("save-signal", self.on_save, win.show_toast)
-        win.present()
+            self.win.connect("save-signal", self.on_save, self.win.show_toast)
+        self.win.present()
 
     def on_about_action(self, *args):
         """Callback for the app.about action."""
@@ -135,6 +138,31 @@ class PanapidasApplication(Adw.Application):
         prefs_dialog.present(self.props.active_window)
         print("app.preferences action activated")
 
+    def _apply_delete_request(self, widget: DeleteDialog, response: str, id: str):
+        if response != "delete":
+            return
+
+        DataManagement.remove_by_id(self.request_group_store, id)
+        self.dataManagement.save_requests(self.request_group_store)
+
+    def on_delete(self, action: Gio.SimpleAction, target):
+        parent_item_id = target.unpack()
+
+        delete_dialog = DeleteDialog("Are you sure you want to delete this item")
+        delete_dialog.connect(
+            "response",
+            self._apply_delete_request,
+            parent_item_id
+        )
+        delete_dialog.present(self.win)
+
+    def on_rename(self, action: Gio.SimpleAction, target):
+        parent_item_id, new_name = target
+        DataManagement.rename_item(
+            store=self.request_group_store, id=parent_item_id, new_name=new_name
+        )
+        self.dataManagement.save_requests(self.request_group_store)
+
     def on_create(self, action: Gio.SimpleAction, target):
         action_name = action.get_name()
         print(target)
@@ -154,10 +182,6 @@ class PanapidasApplication(Adw.Application):
                 new_item=Request(name="New Request"),
             )
 
-        if action_name == "delete-item":
-            parent_item_id = target.unpack()
-            DataManagement.remove_by_id(self.request_group_store, parent_item_id)
-
         if action_name == "create_folder":
             new_group = RequestGroup(name="New Group")
             self.request_group_store.append(new_group)
@@ -165,12 +189,6 @@ class PanapidasApplication(Adw.Application):
         if action_name == "create_request":
             new_request = Request(name="New Request")
             self.request_group_store.append(new_request)
-
-        if action_name == "rename-item":
-            parent_item_id, new_name = target
-            DataManagement.rename_item(
-                store=self.request_group_store, id=parent_item_id, new_name=new_name
-            )
 
         self.dataManagement.save_requests(self.request_group_store)
 
