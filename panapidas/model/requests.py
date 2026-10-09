@@ -51,8 +51,30 @@ class Request(RequestItem):
         self.method = method or "GET"
         self.headers = headers or []
         self.params = params or []
-        self.body = body
+
+        if body is None:
+            self._body = {
+                "type": None,
+                "raw": "",
+                "form_data": [],
+                "urlencoded": [],
+            }
+        else:
+            self._body = {
+                "type": body["type"],
+                "raw": body["raw"],
+                "form_data": Request.map_builder(body["form_data"] or []),
+                "urlencoded": Request.map_builder(body["urlencoded"] or []),
+            }
+
         self._scripts = scripts or {"pre_script": "", "pos_script": ""}
+
+    @staticmethod
+    def map_builder(entry_list):
+        return [
+            MapEntry(id=env.get("id"), key=env.get("key"), value=env.get("value"))
+            for env in entry_list
+        ]
 
     @GObject.Property(type=str)
     def id(self) -> str:
@@ -66,6 +88,14 @@ class Request(RequestItem):
     def scripts(self, value: dict):
         self._scripts = Request.script_to_base64(value)
 
+    @GObject.Property()
+    def body(self) -> dict:
+        return self._body
+
+    @body.setter
+    def body(self, body: dict):
+        self._body = body
+
     def to_dict(self) -> dict[str, any]:
         return {
             "id": self.id,
@@ -74,7 +104,12 @@ class Request(RequestItem):
             "method": self.method,
             "headers": [header.to_dict() for header in self.headers],
             "params": [param.to_dict() for param in self.params],
-            "body": self.body,
+            "body": {
+                "type": self._body["type"],
+                "form_data": [row.to_dict() for row in self._body["form_data"]],
+                "urlencoded": [row.to_dict() for row in self._body["urlencoded"]],
+                "raw": self._body["raw"],
+            },
             "scripts": self._scripts,
         }
 

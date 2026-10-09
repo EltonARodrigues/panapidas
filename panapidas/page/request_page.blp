@@ -142,10 +142,10 @@ template $RequestPage: Adw.Bin {
             name: "body";
             title: _("Body");
 
-            child: Box body_type_widget {
+            child: Box {
               orientation: vertical;
 
-              Adw.ToggleGroup {
+              Adw.ToggleGroup body_toggle_type {
                 active-name: "none";
 
                 styles [
@@ -166,7 +166,7 @@ template $RequestPage: Adw.Bin {
                 }
 
                 Adw.Toggle {
-                  name: "form_urlencoded";
+                  name: "urlencoded";
                   label: _("x-www-form-urlencoded");
                 }
 
