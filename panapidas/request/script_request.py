@@ -3,6 +3,7 @@ import json
 import dukpy
 
 from panapidas.model.env_object import ActiveEnvs
+from panapidas.model.requests import Request
 from panapidas.request.http_request import Response
 
 class PanapidasRequestObject():
@@ -18,16 +19,15 @@ class PanapidasRequestObject():
     def set_url(self, url: str) -> None:
         self.request.url = url
 
-    def get_body(self) -> str:
-        return self.request.body
+    def get_body(self) -> dict:
+        return Request.convert_body_to_dict(self.request.body)
 
-        
     def get_params(self) -> str:
         # Retorna JSON (string) para o JS poder reconstruir
         return json.dumps([ param.to_dict() for param in self.request.params])
 
     def get_headers(self) -> str:
-        return json.dumps(self.request.headers)
+        return json.dumps([ header.to_dict() for header in self.request.headers])
 
     def set_body(self, b: str) -> None:
         self.request.body = b

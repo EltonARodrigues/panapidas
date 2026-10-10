@@ -163,12 +163,12 @@ class RequestPage(Adw.Bin):
     def _call_request(self):
         response = request(
             url=apply_env(self.envs, self.url_entry.get_text()),
-            body=request.body,
+            body=Request.convert_body_to_dict(self.request.body),
             params=self.params.get_formated_dict(),
             headers=self.headers.get_formated_dict() or {},
             method=self.http_method_list.props.selected_item.get_string(),
-            data_as_json=request.body["type"] == "raw",
-            body_type=request.body["type"],
+            data_as_json=self.request.body["type"] == "raw",
+            body_type=self.request.body["type"],
         )
 
         if self.stop_event.is_set():
@@ -211,6 +211,8 @@ class RequestPage(Adw.Bin):
 
     @Gtk.Template.Callback()
     def on_send(self, _):
+        print("on_send")
+        print(self.scripts["pre_script"])
         self.script_runner.run(self.scripts["pre_script"])
         if self.is_destroyed or self.active_request:
             return None
