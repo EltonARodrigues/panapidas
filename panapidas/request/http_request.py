@@ -4,10 +4,11 @@ import typing
 
 import gi
 gi.require_version("Soup", "3.0")
-from gi.repository import GObject, GLib, Soup
+from gi.repository import GObject, GLib, Gio, Soup
 
 from urllib.parse import urlencode
 
+settings = Gio.Settings.new("eltonarodrigues.org.codeberg.panapidas")
 
 class Response(GObject.GObject):
     __gtype_name__ = "Response"
@@ -111,6 +112,9 @@ def request(
     data_as_json: bool = True,
 ):
     session = Soup.Session()
+
+    session.set_timeout(settings.get_int("general-request-timeout"))
+
     base = GLib.Uri.parse(url, GLib.UriFlags.NONE)
 
     uri = GLib.Uri.build(
