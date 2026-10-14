@@ -109,3 +109,6 @@ def _on_env_value_changed(widget: ChangeValueDialog, response_name: str, active_
         return
 
     active_env.set_env(key, widget.get_value())
+
+    window = widget.get_root()
+    window.emit("save-signal", "env")
