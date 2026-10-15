@@ -235,31 +235,64 @@ template $RequestPage: Adw.Bin {
         }
       }
 
-      Box {
+      CenterBox {
         height-request: 35;
-        spacing: 5;
 
         styles [
           "response_status_bar",
         ]
 
-        Label default_status_bar_label {
-          label: _("Response");
+        [start]
+        Box {
+
+          Label default_status_bar_label {
+            label: _("Response");
+          }
+
+          Adw.ToggleGroup request_info_toggle_group {
+            active-name: "body";
+            visible: false;
+
+            styles [
+              "custom_list",
+            ]
+
+            notify::active-name => $on_request_info_change();
+
+            Adw.Toggle {
+              name: "body";
+              label: _("Body");
+            }
+
+            Adw.Toggle {
+              name: "headers";
+              label: _("Headers");
+            }
+          }
         }
 
-        Label response_status_label {
-          visible: false;
-          label: _("Status: {}");
-        }
+        [end]
+        Box {
+          spacing: 5;
 
-        Label response_time_label {
-          visible: false;
-          label: _("Time: {}");
-        }
+          styles [
+            "response_sep",
+          ]
 
-        Label response_size_label {
-          visible: false;
-          label: _("Size: {}");
+          Label response_status_label {
+            visible: false;
+            label: _("Status: {}");
+          }
+
+          Label response_time_label {
+            visible: false;
+            label: _("Time: {}");
+          }
+
+          Label response_size_label {
+            visible: false;
+            label: _("Size: {}");
+          }
         }
       }
 
@@ -273,8 +306,22 @@ template $RequestPage: Adw.Bin {
           "textview",
         ]
 
-        $BodySourceView response_body {
-          editable: false;
+        Box {
+          orientation: vertical;
+
+          $BodySourceView response_body {
+            editable: false;
+          }
+
+          Gtk.ListBox response_header_list {
+            visible: false;
+
+            styles [
+              "custom_list"
+            ]
+
+            selection-mode: none;
+          }
         }
       }
     }

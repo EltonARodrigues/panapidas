@@ -6,18 +6,18 @@
   color: var(--headerbar-fg-color);
 }
 
-.response_status_bar>* {
+.response_sep>* {
   border-right: 1px solid var(--border-color);
   padding-left: 9px;
   padding-right: 9px;
 }
 
-.response_status_bar>*:last-child {
+.response_sep>*:last-child {
   border-right: none;
 }
 
 
-.response_status_bar>label {
+.response_sep>label {
   font-weight: normal;
 }
 

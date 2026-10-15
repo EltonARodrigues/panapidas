@@ -80,23 +80,12 @@ class Response(GObject.GObject):
 
     @property
     def headers(self) -> dict:
-        result = {}
-        it = Soup.MessageHeadersIter()
-        if not self._headers:
-            return None
+        headers_dict = {}
+        self._headers.foreach(
+            lambda name, value, _: headers_dict.__setitem__(name, value), None
+        )
 
-        it.init(self._headers)
-
-        while True:
-            has_next, it, name, value  = it.next(it)
-            if not has_next:
-                break
-            if name in result:
-                result[name].append(value)
-            else:
-                result[name] = [value]
-
-        return result
+        return headers_dict
 
     @headers.setter
     def headers(self, headers):
@@ -190,10 +179,6 @@ def request(
         reason = message.get_reason_phrase()
 
         response_headers = message.get_response_headers()
-        headers_dict = {}
-        response_headers.foreach(
-            lambda name, value, _: headers_dict.__setitem__(name, value), None
-        )
 
         body = ""
         if body_bytes is not None:

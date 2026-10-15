@@ -20,7 +20,11 @@
 from gi.repository import Adw, Gtk, GObject, Gio
 
 from panapidas.model.map_entry import MapEntry
-from panapidas.utils.entry_env_formatter import apply_env, apply_env_style, entry_env_change_gesture
+from panapidas.utils.entry_env_formatter import (
+    apply_env,
+    apply_env_style,
+    entry_env_change_gesture,
+)
 
 
 class MapListMenu(GObject.Object):
@@ -28,7 +32,13 @@ class MapListMenu(GObject.Object):
 
     __gsignals__ = {"map-changed": (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, ())}
 
-    def __init__(self, list_box: Gtk.ListBox, items: list[MapEntry] = [], envs=None, map_env_template: bool = False):
+    def __init__(
+        self,
+        list_box: Gtk.ListBox,
+        items: list[MapEntry] = [],
+        envs=None,
+        map_env_template: bool = False,
+    ):
         super().__init__()
 
         self.envs = envs
@@ -120,6 +130,30 @@ class MapListMenu(GObject.Object):
         linked_box.append(value_entry)
         linked_box.append(close_button)
 
+        return linked_box
+
+    @staticmethod
+    def on_ready_only_list_row(name: str, value: str):
+        linked_box = Gtk.Box(
+            margin_top=8,
+            margin_start=8,
+            margin_end=8,
+            margin_bottom=8,
+            halign="fill",
+            orientation="horizontal",
+        )
+        linked_box.set_css_classes(["linked"])
+
+        key_entry = Gtk.Entry(
+            hexpand=True, placeholder_text="Key", text=name, editable=False
+        )
+
+        value_entry = Gtk.Entry(
+            hexpand=True, placeholder_text="Value", text=value, editable=False
+        )
+
+        linked_box.append(key_entry)
+        linked_box.append(value_entry)
         return linked_box
 
     def get_map_entry(self):

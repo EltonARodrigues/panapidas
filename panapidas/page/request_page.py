@@ -52,11 +52,13 @@ class RequestPage(Adw.Bin):
     body_type_request = Gtk.Template.Child()
     response_body = Gtk.Template.Child()
     default_status_bar_label = Gtk.Template.Child()
+    request_info_toggle_group = Gtk.Template.Child()
     response_status_label = Gtk.Template.Child()
     response_time_label = Gtk.Template.Child()
     response_size_label = Gtk.Template.Child()
     script_type_toggle_group = Gtk.Template.Child()
     script_source_view = Gtk.Template.Child()
+    response_header_list = Gtk.Template.Child()
 
     def __init__(self, request: Request, **kwargs):
         super().__init__(**kwargs)
@@ -134,6 +136,7 @@ class RequestPage(Adw.Bin):
     def _render_response(self, response: Response) -> bool:
         self.default_status_bar_label.set_visible(False)
 
+        self.request_info_toggle_group.set_visible(True)
         self.send_request_button.set_visible(True)
         self.cancel_request_button.set_visible(False)
 
@@ -149,6 +152,11 @@ class RequestPage(Adw.Bin):
         buffer.set_text(response.body, -1)
 
         self.script_runner.run(self.scripts["pos_script"], response=response)
+
+        self.response_header_list.remove_all()
+        for header in response.headers.items():
+            row = MapListMenu.on_ready_only_list_row(header[0], header[1])
+            self.response_header_list.append(row)
 
         return False
 
@@ -275,6 +283,21 @@ class RequestPage(Adw.Bin):
             ),
             -1,
         )
+
+    @Gtk.Template.Callback()
+    def on_request_info_change(
+        self, widget: Adw.ToggleGroup, active_name: GObject.ParamSpec
+    ):
+        toggle_name = widget.get_property(active_name.get_name())
+
+        if (toggle_name == "body"):
+            self.response_header_list.set_visible(False)
+            self.response_body.set_visible(True)
+
+        if (toggle_name == "headers"):
+            self.response_header_list.set_visible(True)
+            self.response_body.set_visible(False)
+
 
     @Gtk.Template.Callback()
     def on_method_change(self, widget: Gtk.DropDown, _):
