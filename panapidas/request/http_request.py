@@ -102,6 +102,19 @@ class Response(GObject.GObject):
     def headers(self, headers):
         self._headers = headers
 
+def search_and_load_cert(url: str) -> Gio.TlsCertificate:
+    cert_list = json.loads(settings.get_string("client-certificates"))
+
+    for cert in cert_list:
+        if cert["url"] in url:
+            try:
+                pfx = Gio.File.new_for_uri(cert["pfx"])
+                key = Gio.File.new_for_uri(cert["key"])
+                return Gio.TlsCertificate.new_from_files(pfx.get_path(), key.get_path())
+            except GLib.Error as e:
+                print(f"Falha ao carregar certificado: {e.message}")
+                return None
+
 def request(
     body_type: str,
     url: str,
@@ -138,8 +151,12 @@ def request(
     else:
         message = Soup.Message.new(method, uri.to_string())
 
-    request_headers = message.get_request_headers()
+    cert = search_and_load_cert(url)
 
+    if cert:
+        message.set_tls_client_certificate(cert)
+
+    request_headers = message.get_request_headers()
     if headers:
         for chave, valor in headers.items():
             request_headers.append(chave, valor)
