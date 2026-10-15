@@ -20,6 +20,8 @@ template $EnvPage: Adw.NavigationPage {
 
         SearchEntry search_entry {
           placeholder-text: _("Search Env");
+
+          search-changed => $on_search_change();
         }
 
         Button add_env_button {

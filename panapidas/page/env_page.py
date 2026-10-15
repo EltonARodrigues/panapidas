@@ -29,8 +29,15 @@ class EnvPage(Adw.NavigationPage):
 
         self.env_store: Gio.ListStore = env_store
 
-        self.selection = Gtk.SingleSelection.new(self.env_store)
+        self.string_filter = Gtk.StringFilter(expression=Gtk.PropertyExpression.new(EnvObject, None, "name"))
+        self.string_filter.set_ignore_case(True)
+        filter_model = Gtk.FilterListModel(model=self.env_store, filter=self.string_filter)
+        self.selection = Gtk.SingleSelection.new(filter_model)
         self.list_envs.set_model(self.selection)
+
+    @Gtk.Template.Callback()
+    def on_search_change(self, widget: Gtk.SearchEntry):
+        self.string_filter.set_search(widget.get_text())
 
     @Gtk.Template.Callback()
     def on_create_env(self, widget: Gtk.Button):
