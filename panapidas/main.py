@@ -33,6 +33,8 @@ from gi.repository import Gtk, Gio, Adw, GLib, GObject, GtkSource, Gdk
 
 from panapidas.page.preferences.preferences_page import PreferencesPage
 from panapidas.widget.delete_dialog import DeleteDialog
+from panapidas.widget.import_dialog import ImportDialog
+from panapidas.request.import_collection import ImportCollection
 from panapidas.model.requests import Request, RequestGroup, RequestItem
 from panapidas.model.env_object import EnvObject
 from panapidas.data_management import DataManagement
@@ -69,6 +71,7 @@ class PanapidasApplication(Adw.Application):
 
         self.create_action("quit", lambda *_: self.quit(), None, ["<control>q"])
         self.create_action("about", self.on_about_action)
+        self.create_action("import", self.on_import_action)
         self.create_action("preferences", self.on_preferences_action)
         self.create_action("create_folder", self.on_create)
         self.create_action("create_request", self.on_create)
@@ -132,6 +135,17 @@ class PanapidasApplication(Adw.Application):
         )
         about.present(self.props.active_window)
 
+    def _import_collection(self, _widget: ImportDialog, path: str):
+        import_collection = ImportCollection()
+        request_group = import_collection.postman_collection(path)
+        self.request_group_store.append(request_group)
+        self.dataManagement.save_requests(self.request_group_store)
+
+    def on_import_action(self, widget, _):
+        import_dialog = ImportDialog()
+        import_dialog.connect("import-file-selected", self._import_collection)
+        import_dialog.present(self.props.active_window)
+
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
         prefs_dialog = PreferencesPage()
@@ -165,7 +179,6 @@ class PanapidasApplication(Adw.Application):
 
     def on_create(self, action: Gio.SimpleAction, target):
         action_name = action.get_name()
-        print(target)
         if action_name == "create-sub-folder":
             parent_item_id = target.unpack()
             DataManagement.add_item(

@@ -71,9 +71,16 @@ class Request(RequestItem):
 
     @staticmethod
     def map_builder(entry_list):
+
+        if isinstance(entry_list, dict):
+            return [
+                MapEntry(id=index, key=form[0], value=form[1])
+                for index, form in enumerate(entry_list.items())
+            ]
+
         return [
-            MapEntry(id=index, key=form[0], value=form[1])
-            for index, form in enumerate(entry_list.items())
+            MapEntry(id=index, key=form["key"], value=form["value"])
+            for index, form in enumerate(entry_list)
         ]
 
     @GObject.Property(type=str)

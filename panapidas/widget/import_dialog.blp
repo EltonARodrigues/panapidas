@@ -1,0 +1,35 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $ImportDialog: Adw.Dialog {
+  title: _("Import Collections");
+  content-width: 400;
+  content-height: 300;
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar { }
+
+    content: Box {
+      orientation: vertical;
+      spacing: 24;
+      valign: center;
+
+      Button import_button {
+        halign: center;
+        label: _("Import...");
+
+        styles [
+            "pill",
+        ]
+
+        clicked => $on_import_collection();
+      }
+
+      Label {
+        label: _("Import Postman Collection(2.1)");
+      }
+
+    };
+  };
+}
