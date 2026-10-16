@@ -219,8 +219,6 @@ class RequestPage(Adw.Bin):
 
     @Gtk.Template.Callback()
     def on_send(self, _):
-        print("on_send")
-        print(self.scripts["pre_script"])
         self.script_runner.run(self.scripts["pre_script"])
         if self.is_destroyed or self.active_request:
             return None

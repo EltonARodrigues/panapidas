@@ -58,7 +58,7 @@ class PanapidasResponseObject():
         return self.response.body
 
     def get_headers(self) -> str:
-        return json.dumps(self.response.headers)
+        return json.dumps(self.response.headers) if self.response.headers is not None else []
 
     def header_get(self, key: str) -> str:
         return self.response.headers.get(key, "")

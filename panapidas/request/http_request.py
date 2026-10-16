@@ -150,7 +150,7 @@ def request(
         for chave, valor in headers.items():
             request_headers.append(chave, valor)
 
-    if body_type == "form_urlencoded":
+    if body_type == "urlencoded":
         request_headers.append("Content-Type", "application/x-www-form-urlencoded")
 
     if body_type == "form_data":
