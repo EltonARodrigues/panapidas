@@ -8,7 +8,7 @@ from panapidas.model.env_object import ActiveEnvs
 from panapidas.widget.change_value_dialog import ChangeValueDialog
 
 
-VARIABLE_PATTERN = r"\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}"
+VARIABLE_PATTERN = r"\{\{\s*([A-Za-z_][A-Za-z0-9_-]*)\s*\}\}"
 
 
 def _create_pango_attr(match: re.match):
