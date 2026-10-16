@@ -152,18 +152,13 @@ def request(
 
     if body_type == "urlencoded":
         request_headers.append("Content-Type", "application/x-www-form-urlencoded")
-
-    if body_type == "form_data":
-        request_headers.append("Content-Type", "multipart/form-data; boundary=<>")
-
-    if data_as_json:
-        request_headers.append("Content-Type", "application/json")
-
-    if body["type"] == "urlencoded":
         encoded = Soup.form_encode_hash(body["urlencoded"])
         message.set_request_body_from_bytes(
             request_headers.get_content_type()[0], GLib.Bytes.new(encoded.encode("utf-8"))
         )
+
+    if data_as_json:
+        request_headers.append("Content-Type", "application/json")
 
     if body["type"] == "raw":
         message.set_request_body_from_bytes(

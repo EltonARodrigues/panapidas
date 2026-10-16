@@ -4,6 +4,7 @@ import uuid
 from gi.repository import Gio, GObject
 
 from panapidas.model.map_entry import MapEntry
+from panapidas.model.env_object import ActiveEnvs
 
 
 class RequestItem(GObject.GObject):
@@ -116,7 +117,17 @@ class Request(RequestItem):
         }
 
     @staticmethod
-    def convert_body_to_dict(body: dict):
+    def convert_body_to_dict(body: dict , apply_env = None):
+        if apply_env is not None:
+            envs = ActiveEnvs().dict_envs
+
+            return {
+                "type": body["type"],
+                "form_data": {apply_env(envs, row.key): apply_env(envs, row.value) for row in body["form_data"]},
+                "urlencoded": {apply_env(envs, row.key): apply_env(envs, row.value) for row in body["urlencoded"]},
+                "raw": body["raw"],
+            }
+
         return {
             "type": body["type"],
             "form_data": {row.key: row.value for row in body["form_data"]},

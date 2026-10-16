@@ -168,10 +168,11 @@ class RequestPage(Adw.Bin):
         )
         self.request.body = body
 
+
     def _call_request(self):
         response = request(
             url=apply_env(self.envs, self.url_entry.get_text()),
-            body=Request.convert_body_to_dict(self.request.body),
+            body=Request.convert_body_to_dict(self.request.body, apply_env),
             params=self.params.get_formated_dict(),
             headers=self.headers.get_formated_dict() or {},
             method=self.http_method_list.props.selected_item.get_string(),
