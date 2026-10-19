@@ -80,6 +80,9 @@ class Response(GObject.GObject):
 
     @property
     def headers(self) -> dict:
+        if self._headers == None:
+            return {}
+
         headers_dict = {}
         self._headers.foreach(
             lambda name, value, _: headers_dict.__setitem__(name, value), None
@@ -113,59 +116,59 @@ def request(
     method: str = "GET",
     data_as_json: bool = True,
 ):
-    session = Soup.Session()
-
-    session.set_timeout(settings.get_int("general-request-timeout"))
-
-    base = GLib.Uri.parse(url, GLib.UriFlags.NONE)
-
-    uri = GLib.Uri.build(
-        GLib.UriFlags.NONE,
-        base.get_scheme(),
-        base.get_userinfo(),
-        base.get_host(),
-        base.get_port(),
-        base.get_path(),
-        urlencode(params) if params else None,
-        base.get_fragment(),
-    )
-
-    if body["type"] == "form_data" and method == "POST":
-        multipart = Soup.Multipart.new("multipart/form-data")
-
-        for key in body["form_data"]:
-            multipart.append_form_string(key, body["form_data"][key])
-
-        message = Soup.Message.new_from_multipart(url, multipart)
-    else:
-        message = Soup.Message.new(method, uri.to_string())
-
-    cert = search_and_load_cert(url)
-
-    if cert:
-        message.set_tls_client_certificate(cert)
-
-    request_headers = message.get_request_headers()
-    if headers:
-        for chave, valor in headers.items():
-            request_headers.append(chave, valor)
-
-    if body_type == "urlencoded":
-        request_headers.append("Content-Type", "application/x-www-form-urlencoded")
-        encoded = Soup.form_encode_hash(body["urlencoded"])
-        message.set_request_body_from_bytes(
-            request_headers.get_content_type()[0], GLib.Bytes.new(encoded.encode("utf-8"))
-        )
-
-    if data_as_json:
-        request_headers.append("Content-Type", "application/json")
-
-    if body["type"] == "raw":
-        message.set_request_body_from_bytes(
-            request_headers.get_content_type()[0], GLib.Bytes.new(body["raw"].encode("utf-8"))
-        )
-
     try:
+        session = Soup.Session()
+
+        session.set_timeout(settings.get_int("general-request-timeout"))
+
+        base = GLib.Uri.parse(url, GLib.UriFlags.NONE)
+
+        uri = GLib.Uri.build(
+            GLib.UriFlags.NONE,
+            base.get_scheme(),
+            base.get_userinfo(),
+            base.get_host(),
+            base.get_port(),
+            base.get_path(),
+            urlencode(params) if params else None,
+            base.get_fragment(),
+        )
+
+        if body["type"] == "form_data" and method == "POST":
+            multipart = Soup.Multipart.new("multipart/form-data")
+
+            for key in body["form_data"]:
+                multipart.append_form_string(key, body["form_data"][key])
+
+            message = Soup.Message.new_from_multipart(url, multipart)
+        else:
+            message = Soup.Message.new(method, uri.to_string())
+
+        cert = search_and_load_cert(url)
+
+        if cert:
+            message.set_tls_client_certificate(cert)
+
+        request_headers = message.get_request_headers()
+        if headers:
+            for chave, valor in headers.items():
+                request_headers.append(chave, valor)
+
+        if body_type == "urlencoded":
+            request_headers.append("Content-Type", "application/x-www-form-urlencoded")
+            encoded = Soup.form_encode_hash(body["urlencoded"])
+            message.set_request_body_from_bytes(
+                request_headers.get_content_type()[0], GLib.Bytes.new(encoded.encode("utf-8"))
+            )
+
+        if data_as_json:
+            request_headers.append("Content-Type", "application/json")
+
+        if body["type"] == "raw":
+            message.set_request_body_from_bytes(
+                request_headers.get_content_type()[0], GLib.Bytes.new(body["raw"].encode("utf-8"))
+            )
+
         time_start_count = time.perf_counter()
         body_bytes = session.send_and_read(message, None)
         time_ttfb = (time.perf_counter() - time_start_count) * 1000
@@ -182,7 +185,7 @@ def request(
         return Response(
             url=message.get_uri().to_string(),
             body=body,
-            headers=response_headers,
+            headers=None,
             status=f"{status} {reason}",
             time_seconds=time_ttfb,
             response_size=len(body),
@@ -190,9 +193,14 @@ def request(
 
     except GLib.Error as e:
         print(f"Connection failed. {e}")
+
+        body = "Connection failed"
+        if e.domain == "g-uri-quark":
+            body = f"ENOTFOUND: {url}"
+
         return Response(
             url=None,
-            body="Connection failed",
+            body=body,
             headers=None,
             status=None,
             time_seconds=None,
