@@ -38,14 +38,17 @@ class MapListMenu(GObject.Object):
         items: list[MapEntry] = [],
         envs=None,
         map_env_template: bool = False,
+        activatable: bool = True
     ):
         super().__init__()
+
+        self.activatable = activatable
 
         self.envs = envs
         self.map_env_template = map_env_template
 
         self.items = items.copy()
-        self.items.append(MapEntry(id=len(self.items) + 1, key="", value=""))
+        self.items.append(MapEntry(id=len(self.items) + 1, key="", value="", active=True))
 
         self.list_model = Gio.ListStore(item_type=MapEntry)
         self.list_model.splice(0, 0, additions=self.items)
@@ -70,6 +73,16 @@ class MapListMenu(GObject.Object):
     def _on_map_change(self):
         self.emit("map-changed")
 
+    def _on_entry_check(self, check_button: Gtk.CheckButton, row_id: int):
+        row_count = self.list_model.get_n_items()
+
+        for index in range(row_count):
+            item = self.list_model.get_item(index)
+
+            if item.id == row_id:
+                item.active = check_button.get_active()
+                return True
+
     def _on_entry_changed(
         self, entry: Gtk.Entry, entry_type: str, list_model: GObject.Object
     ):
@@ -77,9 +90,11 @@ class MapListMenu(GObject.Object):
         has_row = [model for model in self.list_model if model.id == new_id]
 
         if not has_row:
-            self.list_model.append(MapEntry(id=new_id, key="", value=""))
+            self.list_model.append(MapEntry(id=new_id, key="", value="", active=True))
 
         text_value = entry.get_text()
+
+        list_model.active = True
 
         if entry_type == "key":
             list_model.key = text_value
@@ -126,6 +141,13 @@ class MapListMenu(GObject.Object):
 
         close_button.connect("clicked", self._on_destroy_row, model.id)
 
+        if self.activatable:
+            check_entry = Gtk.CheckButton();
+            check_entry.set_active(model.active)
+            check_entry.connect("toggled", self._on_entry_check, model.id)
+            check_entry.set_css_classes(["row_checkbox"])
+            linked_box.append(check_entry)
+
         linked_box.append(key_entry)
         linked_box.append(value_entry)
         linked_box.append(close_button)
@@ -163,6 +185,7 @@ class MapListMenu(GObject.Object):
         items_dict = {
             apply_env(self.envs, row.key): apply_env(self.envs, row.value)
             for row in self.list_model
-            if len(row.key) > 0
+            if len(row.key) > 0 and row.active
         }
+
         return items_dict if len(items_dict.keys()) > 0 else None

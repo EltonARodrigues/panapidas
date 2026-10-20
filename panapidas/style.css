@@ -58,6 +58,15 @@
   background-color:  color-mix(in srgb, currentColor 7%, transparent);
 }
 
+.row_checkbox {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  border-radius: 0;
+  border-top-left-radius: 9px;
+  border-bottom-left-radius: 9px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
 .method_pill {
     min-width: 60px;
     border-radius: 6px;

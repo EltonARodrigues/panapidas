@@ -80,7 +80,9 @@ class Request(RequestItem):
             ]
 
         return [
-            MapEntry(id=index, key=form["key"], value=form["value"])
+            MapEntry(
+                id=index, key=form["key"], value=form["value"], active=form["active"]
+            )
             for index, form in enumerate(entry_list)
         ]
 
@@ -117,21 +119,37 @@ class Request(RequestItem):
         }
 
     @staticmethod
-    def convert_body_to_dict(body: dict , apply_env = None):
+    def convert_body_to_dict(body: dict, apply_env=None, filter_active=False):
         if apply_env is not None:
             envs = ActiveEnvs().dict_envs
 
             return {
                 "type": body["type"],
-                "form_data": {apply_env(envs, row.key): apply_env(envs, row.value) for row in body["form_data"]},
-                "urlencoded": {apply_env(envs, row.key): apply_env(envs, row.value) for row in body["urlencoded"]},
+                "form_data": {
+                    apply_env(envs, row.key): apply_env(envs, row.value)
+                    for row in body["form_data"]
+                    if not (filter_active and not row.active)
+                },
+                "urlencoded": {
+                    apply_env(envs, row.key): apply_env(envs, row.value)
+                    for row in body["urlencoded"]
+                    if not (filter_active and not row.active)
+                },
                 "raw": body["raw"],
             }
 
         return {
             "type": body["type"],
-            "form_data": {row.key: row.value for row in body["form_data"]},
-            "urlencoded": {row.key: row.value for row in body["urlencoded"]},
+            "form_data": {
+                row.key: row.value
+                for row in body["form_data"]
+                if not (filter_active and not row.active)
+            },
+            "urlencoded": {
+                row.key: row.value
+                for row in body["urlencoded"]
+                if not (filter_active and not row.active)
+            },
             "raw": body["raw"],
         }
 
@@ -167,9 +185,7 @@ class RequestGroup(RequestItem):
     def build_map_entry(map_list: list) -> list[MapEntry]:
         return [
             MapEntry(
-                id=row["id"],
-                key=row["key"],
-                value=row["value"],
+                id=row["id"], key=row["key"], value=row["value"], active=row["active"]
             )
             for row in map_list
         ]

@@ -14,7 +14,7 @@ class ImportCollection:
     def convert_object(items):
         if isinstance(items, list):
             return [
-                {"id": index, "key": item["key"], "value": item["value"]}
+                {"id": index, "key": item["key"], "value": item["value"], "active": True}
                 for index, item in enumerate(items)
             ]
         return []
