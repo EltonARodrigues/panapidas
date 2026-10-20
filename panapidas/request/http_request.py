@@ -19,8 +19,9 @@ class Response(GObject.GObject):
     _headers: Soup.MessageHeaders
     _time_seconds: int = 0
     _response_size: int = 0
+    response_type: str
 
-    def __init__(self, url: str, body, status: str, headers: Soup.MessageHeaders, time_seconds, response_size):
+    def __init__(self, url: str, body, status: str, headers: Soup.MessageHeaders, time_seconds, response_size, response_type):
         super().__init__()
         self.url = url
         self.body = body
@@ -28,6 +29,7 @@ class Response(GObject.GObject):
         self._headers = headers
         self._time_seconds = time_seconds
         self._response_size = response_size
+        self.response_type = response_type
 
     @staticmethod
     def convert_json(body) -> typing.Any:
@@ -107,6 +109,18 @@ def search_and_load_cert(url: str) -> Gio.TlsCertificate:
                 print(f"Falha ao carregar certificado: {e.message}")
                 return None
 
+def convert_json(body: str):
+    try:
+        stripped = body.strip()
+        if not stripped or stripped[0] not in '{[':
+            return "texinfo", body
+
+        tett = json.dumps(json.loads(body), indent=4, ensure_ascii=False)
+        return "json", tett
+    except ValueError:
+        return "texinfo", body
+
+
 def request(
     body_type: str,
     url: str,
@@ -182,13 +196,15 @@ def request(
         if body_bytes is not None:
             body = body_bytes.get_data().decode("utf-8", errors="replace")
 
+        body_type, body_formated = convert_json(body)
         return Response(
             url=message.get_uri().to_string(),
-            body=body,
-            headers=None,
+            body=body_formated,
+            headers=response_headers,
             status=f"{status} {reason}",
             time_seconds=time_ttfb,
             response_size=len(body),
+            response_type=body_type
         )
 
     except GLib.Error as e:
@@ -205,4 +221,5 @@ def request(
             status=None,
             time_seconds=None,
             response_size=None,
+            response_type="text"
         )

@@ -148,8 +148,8 @@ class RequestPage(Adw.Bin):
             self.response_size_label, response.response_size
         )
 
-        buffer = self.response_body.get_buffer()
-        buffer.set_text(response.body, -1)
+        self.response_body.set_language(response.response_type)
+        self.response_body.set_response(response.body)
 
         self.script_runner.run(self.scripts["pos_script"], response=response)
 

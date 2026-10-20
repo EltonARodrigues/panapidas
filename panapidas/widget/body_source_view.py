@@ -26,6 +26,9 @@ class BodySourceView(GtkSource.View):
 
         if language:
             self.buffer.set_language(language)
+
+    def set_response(self, text: str):
+        self.buffer.set_text(text, -1)
         
 
     def update_style(self):
