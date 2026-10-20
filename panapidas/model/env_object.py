@@ -74,7 +74,7 @@ class ActiveEnvs(EnvObject):
         super().__init__()
         self._id = None
         self._name = None
-        self._envs = None
+        self._envs = []
 
         self._initialized = True
 

@@ -91,11 +91,13 @@ class PanapidasWindow(Adw.ApplicationWindow):
     @Gtk.Template.Callback()
     def on_env_group_selected(self, dropdown: Gtk.DropDown, _: GObject):
         env_group = dropdown.get_selected_item()
-        self.activeEnv.initialize(env_group.id, env_group.name, env_group.envs)
-        self.env_selected = env_group;
 
-        if self.request_selected:
-            self.request_selected.on_change_env(self.env_selected)
+        if env_group:
+            self.activeEnv.initialize(env_group.id, env_group.name, env_group.envs)
+            self.env_selected = env_group;
+
+            if self.request_selected:
+                self.request_selected.on_change_env(self.env_selected)
 
     @Gtk.Template.Callback()
     def on_save(self, _, type: str = "request"):

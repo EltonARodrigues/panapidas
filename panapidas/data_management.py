@@ -1,6 +1,6 @@
-import sys
 import os
 import json
+import uuid
 
 from gi.repository import GLib, GObject, Gio
 
@@ -22,6 +22,59 @@ class DataManagement:
         print(self.data_path)
         self._request_group = None
 
+    @staticmethod
+    def create_request_example():
+        return {
+            "id": "a",
+            "name": "Example Request",
+            "url": "{{base_url}}/test/post",
+            "method": "POST",
+            "headers": [
+                {
+                "id": 0,
+                "key": "Content-Type",
+                "value": "application/json",
+                "active": True
+                }
+            ],
+            "params": [
+                {
+                "id": 1,
+                "key": "foo",
+                "value": "bar",
+                "active": True
+                },
+                {
+                "id": 2,
+                "key": "var",
+                "value": "{{var}}",
+                "active": True
+                }
+            ],
+            "body": {
+                "type": "raw",
+                "form_data": {},
+                "urlencoded": {},
+                "raw": "{\n  \"name\": \"Test\",\n  \"value\": 123\n}"
+            },
+            "scripts": {
+                "pre_script": "dXJsID0gcGEucmVxdWVzdC51cmwKcGEudmFyaWFibGUuc2V0KCJ2YXIiLCB1cmwp",
+                "pos_script": "Ym9keSA9IHBhLnJlcXVlc3QuYm9keQpwYS52YXJpYWJsZS5zZXQoImJvZHkiLCBib2R5KQ=="
+            }
+        }
+
+    def create_root_group(self) -> dict:
+        group = {
+            "id": str(uuid.uuid4()),
+            "name": "Panapidas",
+            "children": [DataManagement.create_request_example()],
+        }
+
+        with open(self.data_path, "w", encoding="utf-8") as f:
+            json.dump(group, f, indent=2, ensure_ascii=False)
+
+        return group
+
     def _load(self, path: str) -> dict | None:
         if not os.path.exists(path):
             print("Arquivo não encontrado. Retornando lista vazia.")
@@ -30,16 +83,13 @@ class DataManagement:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-
     def load_requests(self) -> RequestGroup:
         data = self._load(self.data_path)
 
         if not data:
-            return RequestGroup("ROOT", "", [])
+            data = self.create_root_group()
 
-        self._request_group = RequestGroup(
-            data["id"], data["name"], data["children"]
-        )
+        self._request_group = RequestGroup(data["id"], data["name"], data["children"])
         return self._request_group
 
     def load_envs(self) -> list[EnvObject]:
@@ -48,25 +98,25 @@ class DataManagement:
         if not data:
             return []
 
-        env_list = [EnvObject(env["id"], env["name"], env["envs_map"]) for env in data["envs"]]
+        env_list = [
+            EnvObject(env["id"], env["name"], env["envs_map"]) for env in data["envs"]
+        ]
         return env_list
 
     def save_envs(self, envs_store):
         os.makedirs(self.app_dir, exist_ok=True)
 
-        envs = [] 
+        envs = []
         for i in range(envs_store.get_n_items()):
             objeto = envs_store.get_item(i)
             envs.append(objeto.to_dict())
 
-        env_dict = {
-            "envs": envs
-        }
+        env_dict = {"envs": envs}
         with open(self.env_path, "w", encoding="utf-8") as f:
             json.dump(env_dict, f, indent=2, ensure_ascii=False)
 
         print(f"Dados de envs salvos com sucesso em: {self.env_path}")
-    
+
     def save_requests(self, store: Gio.ListStore):
         os.makedirs(self.app_dir, exist_ok=True)
 
