@@ -66,7 +66,7 @@ class PanapidasApplication(Adw.Application):
         self.request_group_store = Gio.ListStore.new(RequestItem)
         self.request_group_store.splice(0, 0, additions=request_group.children)
         self.group_list_model = Gtk.TreeListModel.new(
-            self.request_group_store, False, True, self.create_child_model
+            self.request_group_store, False, False, self.create_child_model
         )
 
         self.create_action("quit", lambda *_: self.quit(), None, ["<control>q"])
