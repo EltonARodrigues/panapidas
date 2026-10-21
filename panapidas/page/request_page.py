@@ -114,7 +114,7 @@ class RequestPage(Adw.Bin):
         )
         self.params.connect("map-changed", self._on_map_change, "params")
 
-        self.body_toggle_type.set_active_name(request.body["type"] or "None")
+        self.body_toggle_type.set_active_name(request.body["type"] or "none")
 
         self.request_body_source.set_hexpand(True)
         self.request_body_source.set_halign(Gtk.Align.FILL)
@@ -255,7 +255,7 @@ class RequestPage(Adw.Bin):
 
         if body_type == "raw":
             request_body_buffer = self.request_body_source.get_buffer()
-            request_body_buffer.set_text(self.request.body["raw"])
+            request_body_buffer.set_text(self.request.body["raw"] or "")
             self.body_type_request.set_child(self.request_body_source)
 
         if body_type in ["form_data", "urlencoded"]:

@@ -17,9 +17,6 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import os
-import json
-
 from gi.repository import Adw, Gio, Gtk, GObject
 
 from panapidas.model.env_object import EnvObject, ActiveEnvs
