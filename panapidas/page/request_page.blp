@@ -193,24 +193,39 @@ template $RequestPage: Adw.Bin {
             child: Box {
               orientation: vertical;
 
-              Adw.ToggleGroup script_type_toggle_group {
-                active-name: "pre";
+              Box {
+                Adw.ToggleGroup script_type_toggle_group {
+                  active-name: "pre";
+                  hexpand: true;
 
-                styles [
-                  "toolbar",
-                  "custom_list",
-                ]
+                  styles [
+                    "toolbar",
+                    "custom_list",
+                  ]
 
-                notify::active-name => $on_script_type_change();
+                  notify::active-name => $on_script_type_change();
 
-                Adw.Toggle {
-                  name: "pre";
-                  label: _("Pre-request");
+                  Adw.Toggle {
+                    name: "pre";
+                    label: _("Pre-request");
+                  }
+
+                  Adw.Toggle {
+                    name: "post";
+                    label: _("Post-request");
+                  }
                 }
 
-                Adw.Toggle {
-                  name: "post";
-                  label: _("Post-request");
+                Button {
+                  label: "teste";
+                  icon-name: "info-outline-symbolic";
+
+                  styles [
+                    "flat",
+                    "button-info"
+                  ]
+
+                  clicked => $on_info_button_clicked();
                 }
               }
 

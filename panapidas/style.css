@@ -67,6 +67,20 @@
   padding-right: 6px;
 }
 
+.button-info {
+  background-color: var(--headerbar-bg-color);
+  border-radius: 0px;
+}
+
+.button-info:hover {
+  background-color: color-mix(in srgb, currentColor 10%, transparent);
+  border-radius: 0px;
+}
+
+.code_copy {
+   border-radius: 9px;
+}
+
 .method_pill {
     min-width: 60px;
     border-radius: 6px;

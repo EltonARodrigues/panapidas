@@ -1,0 +1,53 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $ScripInfoPage: Adw.PreferencesDialog {
+  title: _("Script Snippers");
+
+  Adw.PreferencesPage {
+    Adw.PreferencesGroup {
+      title: _("Variables");
+      description: _("How to get a variable in scripts:");
+
+      $CopyCode {
+        code-text: "pa.variable.get(\"VAR_NAME\")";
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: _("Variables");
+      description: _("Set variable value:");
+
+      $CopyCode {
+        code-text: "pa.variable.set(\"VAR_NAME\", \"VAR_VALUE\")";
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: _("Request");
+      description: _("Get request infos:");
+
+      $CopyCode {
+        code-text: "pa.request.url\npa.request.method\npa.request.body\npa.request.headers\npa.request.params";
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: _("Request");
+      description: _("Set request infos:");
+
+      $CopyCode {
+        code-text: "pa.request.set_body(\"VALUE\")";
+      }
+    }
+
+    Adw.PreferencesGroup {
+      title: _("Response");
+      description: _("Get response infos:");
+
+      $CopyCode {
+        code-text: "pa.response.url\npa.response.body\npa.response.headers\npa.response.header_get(\"key\")";
+      }
+    }
+  }
+}

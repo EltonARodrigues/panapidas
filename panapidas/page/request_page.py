@@ -21,7 +21,7 @@ import threading
 
 from gi.repository import Adw, GLib, Gtk, GObject, Pango
 
-from panapidas.model import env_object
+from panapidas.page.script_info_page import ScripInfoPage
 from panapidas.widget.map_list_menu import MapListMenu
 from panapidas.widget.body_source_view import BodySourceView
 from panapidas.request.http_request import request, Response
@@ -311,3 +311,8 @@ class RequestPage(Adw.Bin):
         self.request.url = text
 
         apply_env_style(self.envs, text, widget)
+
+    @Gtk.Template.Callback()
+    def on_info_button_clicked(self, widget: Gtk.Button):
+        info_page = ScripInfoPage()
+        info_page.present(self)
