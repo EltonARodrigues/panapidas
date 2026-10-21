@@ -48,6 +48,7 @@ class PanapidasWindow(Adw.ApplicationWindow):
 
         self.env_selected = None
         self.request_selected = None
+        self.request_id_selected = None
 
         self.env_group_dropdown.set_expression(
             Gtk.ClosureExpression.new(
@@ -116,6 +117,7 @@ class PanapidasWindow(Adw.ApplicationWindow):
         self.request_navigation.set_title(request.name)
         self.save_request_button.set_visible(True)
         self.request_selected = self.request_pages[request.id]
+        self.request_id_selected = request.id
         self.content_request.set_content(self.request_pages[request.id])
 
     def _on_list_model_change(
@@ -127,8 +129,8 @@ class PanapidasWindow(Adw.ApplicationWindow):
             pages_ids = self.request_pages.keys()
             removed_ids = list(set(pages_ids).difference(actual_ids))
 
-            for k in removed_ids:
-                self.request_pages.pop(k, None)
+            for request_id in removed_ids:
+                self.request_pages.pop(request_id, None)
 
-            self.content_request.set_content(None)
-
+                if request_id == self.request_id_selected:
+                    self.content_request.set_content(None)
