@@ -14,7 +14,12 @@ class ImportCollection:
     def convert_object(items):
         if isinstance(items, list):
             return [
-                {"id": index, "key": item["key"], "value": item["value"], "active": True}
+                {
+                    "id": index,
+                    "key": item["key"],
+                    "value": item["value"],
+                    "active": True,
+                }
                 for index, item in enumerate(items)
             ]
         return []
@@ -68,11 +73,12 @@ class ImportCollection:
                 "children": self.convert_group(item["item"]),
             }
 
-        url, params = (
-            ImportCollection.url_object_to_string(item["request"])
+        raw_url = (
+            item["request"]
             if isinstance(item["request"], str)
-            else ImportCollection.url_object_to_string(item["request"]["url"])
+            else item["request"]["url"]
         )
+        url, params = ImportCollection.url_object_to_string(raw_url)
 
         body = {
             "type": None,
@@ -86,8 +92,14 @@ class ImportCollection:
 
             body["type"] = item["request"]["body"]["mode"]
             body["raw"] = item["request"]["body"]["raw"] if body_type == "raw" else ""
-            body["form_data"] = item["request"]["body"]["form_data"] if body_type == "form_data" else {}
-            body["urlencoded"] = item["request"]["body"]["urlencoded"] if body_type == "urlencoded" else {}
+            body["form_data"] = (
+                item["request"]["body"]["form_data"] if body_type == "form_data" else {}
+            )
+            body["urlencoded"] = (
+                item["request"]["body"]["urlencoded"]
+                if body_type == "urlencoded"
+                else {}
+            )
 
         return {
             "id": str(uuid.uuid4()),
@@ -107,7 +119,6 @@ class ImportCollection:
             "body": body,
             "scripts": {"pre_script": "", "pos_script": ""},
         }
-
     def convert_group(self, items):
         return [self.convert_postman_item(item) for item in items]
 

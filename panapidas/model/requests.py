@@ -81,7 +81,7 @@ class Request(RequestItem):
 
         return [
             MapEntry(
-                id=index, key=form["key"], value=form["value"], active=form["active"]
+                id=index, key=form["key"], value=form["value"], active=form.get("active", True)
             )
             for index, form in enumerate(entry_list)
         ]
@@ -185,7 +185,7 @@ class RequestGroup(RequestItem):
     def build_map_entry(map_list: list) -> list[MapEntry]:
         return [
             MapEntry(
-                id=row["id"], key=row["key"], value=row["value"], active=row["active"]
+                id=row["id"], key=row["key"], value=row["value"], active=row.get("active", True)
             )
             for row in map_list
         ]
