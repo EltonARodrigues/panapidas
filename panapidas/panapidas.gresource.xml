@@ -17,4 +17,7 @@
     <file preprocess="xml-stripblanks">widget/body_source_view.ui</file>
     <file>style.css</file>
   </gresource>
+  <gresource prefix="/eltonarodrigues/org/codeberg/panapidas/icons">
+    <file alias="dot-large-symbolic.svg" preprocess="xml-stripblanks">icons/actions/dot-large-symbolic.svg</file>
+  </gresource>
 </gresources>

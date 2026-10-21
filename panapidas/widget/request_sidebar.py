@@ -5,6 +5,7 @@ from panapidas.widget.item_popover import ItemPopover
 from panapidas.widget.rename_popover import RenamePopover
 
 RIGHT_MOUSE_BUTTON = 3
+LEFT_MOUSE_BUTTON = 1
 
 
 @Gtk.Template(
@@ -48,7 +49,7 @@ class RequestSidebar(Adw.NavigationPage):
     def on_setup_factory(
         self, factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
     ):
-        box = Gtk.Box()
+        box = Gtk.Box(spacing=6)
         expander = Gtk.TreeExpander()
         expander.set_child(box)
 
@@ -64,13 +65,25 @@ class RequestSidebar(Adw.NavigationPage):
         tree_row = list_item.get_item()
         expander.props.list_row = tree_row
 
-        gesture = Gtk.GestureClick()
-
         item = tree_row.get_item()
 
-        gesture.set_button(RIGHT_MOUSE_BUTTON)
-        gesture.connect("pressed", self.on_cell_right_click, expander, item)
-        expander.add_controller(gesture)
+        gesture_right = Gtk.GestureClick()
+        gesture_right.set_button(RIGHT_MOUSE_BUTTON)
+        gesture_right.connect("pressed", self.on_cell_right_click, expander, item)
+        expander.add_controller(gesture_right)
+
+        if not hasattr(item, "children"):
+            icon = Gtk.Image.new_from_icon_name("dot-large-symbolic")
+            icon.set_visible(False)
+            box.append(icon)
+
+            gesture_left = Gtk.GestureClick()
+            gesture_left.set_button(LEFT_MOUSE_BUTTON)
+            gesture_left.connect(
+                "pressed", lambda self, _g, _n, _x, icon: icon.set_visible(True),
+                icon
+            )
+            expander.add_controller(gesture_left)
 
         method_class = ["method_pill"]
         if hasattr(item, "method") and item.method is not None:
