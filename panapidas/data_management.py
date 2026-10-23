@@ -16,9 +16,8 @@ class DataManagement:
 
     def __init__(self):
         self.data_dir = GLib.get_user_data_dir()
-        self.app_dir = os.path.join(self.data_dir, APPLICATION_NAME)
-        self.data_path = os.path.join(self.app_dir, APPLICATION_DATA_FILENAME)
-        self.env_path = os.path.join(self.app_dir, APPLICATION_ENVS_FILENAME)
+        self.data_path = os.path.join(self.data_dir, APPLICATION_DATA_FILENAME)
+        self.env_path = os.path.join(self.data_dir, APPLICATION_ENVS_FILENAME)
         print(self.data_path)
         self._request_group = None
 
@@ -70,7 +69,7 @@ class DataManagement:
             "children": [DataManagement.create_request_example()],
         }
 
-        with open(self.data_path, "w", encoding="utf-8") as f:
+        with open(self.data_path, "x", encoding="utf-8") as f:
             json.dump(group, f, indent=2, ensure_ascii=False)
 
         return group
@@ -104,7 +103,6 @@ class DataManagement:
         return env_list
 
     def save_envs(self, envs_store):
-        os.makedirs(self.app_dir, exist_ok=True)
 
         envs = []
         for i in range(envs_store.get_n_items()):
@@ -118,7 +116,6 @@ class DataManagement:
         print(f"Dados de envs salvos com sucesso em: {self.env_path}")
 
     def save_requests(self, store: Gio.ListStore):
-        os.makedirs(self.app_dir, exist_ok=True)
 
         self._request_group.children = []
         for i in range(store.get_n_items()):
